@@ -1,0 +1,79 @@
+package com.btg.fondos.infrastructure.adapter.out.persistence;
+
+import com.btg.fondos.domain.model.Client;
+import com.btg.fondos.domain.model.NotificationType;
+import com.btg.fondos.domain.model.Role;
+import com.btg.fondos.domain.port.out.ClientRepository;
+import com.btg.fondos.infrastructure.adapter.out.persistence.entity.ClientEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class DynamoDbClientRepository implements ClientRepository {
+
+    private final DynamoDbTable<ClientEntity> clientTable;
+
+    @Override
+    public Client save(Client client) {
+        ClientEntity entity = toEntity(client);
+        clientTable.putItem(entity);
+        return client;
+    }
+
+    @Override
+    public Optional<Client> findById(String clientId) {
+        ClientEntity entity = clientTable.getItem(
+                Key.builder().partitionValue(clientId).build());
+        return Optional.ofNullable(entity).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<Client> findByEmail(String email) {
+        DynamoDbIndex<ClientEntity> emailIndex = clientTable.index("email-index");
+        var results = emailIndex.query(QueryConditional.keyEqualTo(
+                Key.builder().partitionValue(email).build()));
+
+        return results.stream()
+                .flatMap(page -> page.items().stream())
+                .findFirst()
+                .map(this::toDomain);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return findByEmail(email).isPresent();
+    }
+
+    private ClientEntity toEntity(Client client) {
+        ClientEntity entity = new ClientEntity();
+        entity.setClientId(client.getClientId());
+        entity.setName(client.getName());
+        entity.setEmail(client.getEmail());
+        entity.setPhone(client.getPhone());
+        entity.setBalance(client.getBalance());
+        entity.setNotificationPreference(client.getNotificationPreference().name());
+        entity.setPassword(client.getPassword());
+        entity.setRole(client.getRole().name());
+        return entity;
+    }
+
+    private Client toDomain(ClientEntity entity) {
+        return Client.builder()
+                .clientId(entity.getClientId())
+                .name(entity.getName())
+                .email(entity.getEmail())
+                .phone(entity.getPhone())
+                .balance(entity.getBalance())
+                .notificationPreference(NotificationType.valueOf(entity.getNotificationPreference()))
+                .password(entity.getPassword())
+                .role(Role.valueOf(entity.getRole()))
+                .build();
+    }
+}

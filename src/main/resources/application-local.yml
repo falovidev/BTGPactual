@@ -1,0 +1,11 @@
+aws:
+  dynamodb:
+    endpoint: http://localhost:8000
+    region: us-east-1
+  sns:
+    enabled: false
+
+logging:
+  level:
+    com.btg.fondos: DEBUG
+    software.amazon.awssdk: WARN

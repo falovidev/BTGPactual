@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: fondos-api
+  profiles:
+    active: local
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: bXlTdXBlclNlY3JldEtleUZvckpXVEF1dGhlbnRpY2F0aW9uQlRHUGFjdHVhbDIwMjU=
+    expiration-ms: 86400000
+  client:
+    initial-balance: 500000
