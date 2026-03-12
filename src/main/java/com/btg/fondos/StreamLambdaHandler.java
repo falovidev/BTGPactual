@@ -23,6 +23,8 @@ public class StreamLambdaHandler implements RequestStreamHandler {
                 handler.getContainerConfig().setServiceBasePath(basePath);
                 handler.getContainerConfig().setStripBasePath(true);
             }
+            handler.getContainerConfig().addBinaryContentTypes(
+                    "application/javascript", "text/css", "text/html", "image/png", "image/svg+xml");
         } catch (ContainerInitializationException e) {
             throw new IllegalStateException("No se pudo inicializar el contenedor Spring Boot en Lambda", e);
         }

@@ -10,6 +10,11 @@ aws:
     enabled: true
     topic-arn: ${SNS_TOPIC_ARN}
 
+springdoc:
+  swagger-ui:
+    configUrl: /${API_BASE_PATH}/v3/api-docs/swagger-config
+    url: /${API_BASE_PATH}/v3/api-docs
+
 logging:
   level:
     com.btg.fondos: INFO

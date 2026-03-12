@@ -13,8 +13,7 @@ API REST para la gestión de fondos de inversión que permite a los clientes sus
 | Autenticación | JWT (JSON Web Tokens) |
 | Notificaciones | AWS SNS (Email/SMS) |
 | Documentación API | Swagger / OpenAPI 3 |
-| Contenedores | Docker |
-| Infraestructura | AWS CloudFormation (ECS Fargate) |
+| Infraestructura | AWS SAM (Lambda + API Gateway) |
 
 ## Arquitectura
 
@@ -104,28 +103,31 @@ src/main/java/com/btg/fondos/
 
 ## Ejecutar Localmente
 
-### Opción 1: Con Docker Compose (recomendado)
+### 1. Iniciar DynamoDB Local
+
+El proyecto incluye DynamoDB Local en `dynamodb-local/`. Abrir una terminal y ejecutar:
 
 ```bash
-docker-compose up --build
+cd dynamodb-local
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -inMemory
 ```
 
-### Opción 2: Sin Docker
+DynamoDB quedará disponible en `http://localhost:8000`.
 
-1. Iniciar DynamoDB Local:
-```bash
-docker run -p 8000:8000 amazon/dynamodb-local
-```
+### 2. Ejecutar la aplicación
 
-2. Ejecutar la aplicación:
+En otra terminal:
+
 ```bash
 ./gradlew bootRun
 ```
 
+Se activa automáticamente el perfil `local` que conecta a DynamoDB Local y desactiva SNS.
+
 ### Acceder a la API
 
 - API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui.html
+- Swagger UI: http://localhost:8080/swagger-ui/index.html
 
 ## Ejemplo de Uso
 
@@ -170,19 +172,26 @@ curl -X DELETE http://localhost:8080/api/funds/1/cancel \
 Ver la [guía de despliegue completa](docs/DEPLOYMENT.md).
 
 Resumen:
-1. Construir y subir imagen Docker a ECR
-2. Desplegar con CloudFormation: `aws cloudformation create-stack ...`
-3. La infraestructura incluye: VPC, ECS Fargate, ALB, DynamoDB, SNS, IAM
+```bash
+./gradlew buildZip
+sam build -t cloudformation/template-serverless.yaml
+sam deploy -t cloudformation/template-serverless.yaml --resolve-s3 \
+  --stack-name fondos-api-prod --capabilities CAPABILITY_IAM \
+  --parameter-overrides "JwtSecret=<BASE64_SECRET> Environment=prod" \
+  --no-confirm-changeset
+```
+
+Infraestructura desplegada: Lambda (Java 21 + SnapStart), API Gateway HTTP, DynamoDB, SNS, IAM.
 
 ## Estructura de Costos AWS (Free Tier)
 
 | Servicio | Estimado/mes |
 |----------|-------------|
+| Lambda (1M req free) | $0 |
+| API Gateway HTTP (1M req free) | $0 |
 | DynamoDB (25GB free) | $0 |
 | SNS (1M free) | $0 |
-| ECS Fargate | ~$10 |
-| ALB (primer año) | $0 |
-| **Total** | **~$10/mes** |
+| **Total** | **$0/mes** |
 
 ## Mejoras para Producción
 
