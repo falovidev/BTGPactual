@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static com.btg.fondos.domain.testbuilder.FundBuilder.aFund;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Entidad Transaction")
 class TransactionTest {
 
-    private final Fund fund = new Fund("f-1", "FPV_BTG_PACTUAL_RECAUDADORA",
-            new BigDecimal("75000"), "FPV");
+    private final Fund fund = aFund().build();
 
     @Test
     @DisplayName("Debe crear transacción de apertura con factory method")
@@ -21,7 +21,7 @@ class TransactionTest {
 
         assertThat(tx.getTransactionId()).isNotBlank();
         assertThat(tx.getClientId()).isEqualTo("c-1");
-        assertThat(tx.getFundId()).isEqualTo("f-1");
+        assertThat(tx.getFundId()).isEqualTo("1");
         assertThat(tx.getFundName()).isEqualTo("FPV_BTG_PACTUAL_RECAUDADORA");
         assertThat(tx.getType()).isEqualTo(TransactionType.OPENING);
         assertThat(tx.getAmount()).isEqualByComparingTo(new BigDecimal("75000"));
@@ -35,7 +35,7 @@ class TransactionTest {
 
         assertThat(tx.getTransactionId()).isNotBlank();
         assertThat(tx.getClientId()).isEqualTo("c-1");
-        assertThat(tx.getFundId()).isEqualTo("f-1");
+        assertThat(tx.getFundId()).isEqualTo("1");
         assertThat(tx.getFundName()).isEqualTo("FPV_BTG_PACTUAL_RECAUDADORA");
         assertThat(tx.getType()).isEqualTo(TransactionType.CANCELLATION);
         assertThat(tx.getAmount()).isEqualByComparingTo(new BigDecimal("75000"));

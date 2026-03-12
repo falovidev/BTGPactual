@@ -13,10 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static com.btg.fondos.domain.testbuilder.ClientBuilder.aClient;
+import static com.btg.fondos.domain.testbuilder.TransactionBuilder.aTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -34,14 +35,11 @@ class GetTransactionHistoryServiceTest {
     @Test
     @DisplayName("Debe retornar historial de transacciones del cliente")
     void shouldReturnTransactionHistory() {
-        Client client = new Client("client-1", "Juan Pérez", null, null,
-                new BigDecimal("500000"), null, null, null);
+        Client client = aClient().build();
 
         var transactions = List.of(
-                new Transaction("tx-1", "client-1", null, null,
-                        TransactionType.OPENING, null, null),
-                new Transaction("tx-2", "client-1", null, null,
-                        TransactionType.CANCELLATION, null, null)
+                aTransaction().withTransactionId("tx-1").withType(TransactionType.OPENING).build(),
+                aTransaction().withTransactionId("tx-2").withType(TransactionType.CANCELLATION).build()
         );
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(client));
         when(transactionRepository.findByClientId("client-1")).thenReturn(transactions);

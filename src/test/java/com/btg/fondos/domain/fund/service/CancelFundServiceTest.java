@@ -2,7 +2,6 @@ package com.btg.fondos.domain.fund.service;
 
 import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.model.Client;
-import com.btg.fondos.domain.client.model.Role;
 import com.btg.fondos.domain.client.port.ClientRepository;
 import com.btg.fondos.domain.fund.exception.FundNotFoundException;
 import com.btg.fondos.domain.fund.exception.SubscriptionNotFoundException;
@@ -10,7 +9,6 @@ import com.btg.fondos.domain.fund.model.Fund;
 import com.btg.fondos.domain.fund.model.Subscription;
 import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
-import com.btg.fondos.domain.notification.model.NotificationType;
 import com.btg.fondos.domain.transaction.model.Transaction;
 import com.btg.fondos.domain.transaction.model.TransactionType;
 import com.btg.fondos.domain.transaction.port.TransactionRepository;
@@ -23,9 +21,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Optional;
 
+import static com.btg.fondos.domain.testbuilder.ClientBuilder.aClient;
+import static com.btg.fondos.domain.testbuilder.FundBuilder.aFund;
+import static com.btg.fondos.domain.testbuilder.SubscriptionBuilder.aSubscription;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,18 +48,14 @@ class CancelFundServiceTest {
 
     @BeforeEach
     void setUp() {
-        defaultClient = new Client("client-1", "Juan Pérez", "juan@test.com", "+573001234567",
-                new BigDecimal("425000"), NotificationType.EMAIL, null, Role.USER);
-
-        fundRecaudadora = new Fund("1", "FPV_BTG_PACTUAL_RECAUDADORA",
-                new BigDecimal("75000"), "FPV");
+        defaultClient = aClient().withBalance("425000").build();
+        fundRecaudadora = aFund().build();
     }
 
     @Test
     @DisplayName("Debe cancelar y retornar el monto al saldo")
     void shouldCancelAndReturnBalance() {
-        Subscription sub = new Subscription("client-1", "1",
-                "FPV_BTG_PACTUAL_RECAUDADORA", new BigDecimal("75000"), Instant.now());
+        Subscription sub = aSubscription().build();
 
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
