@@ -1,0 +1,688 @@
+{
+  "info": {
+    "name": "BTG Pactual - Fondos de Inversión API",
+    "description": "Colección para probar todos los endpoints de la API de Fondos de Inversión.\n\n**Flujo de prueba:**\n1. Registrar cliente\n2. Login (copia automáticamente el token)\n3. Suscribirse a fondos\n4. Ver suscripciones\n5. Ver historial de transacciones\n6. Cancelar suscripción\n7. Ver perfil y saldo actualizado",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Registrar Cliente (EMAIL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('clientId', json.clientId);",
+                  "    pm.test('Cliente registrado exitosamente', function () {",
+                  "        pm.expect(json.name).to.eql('Juan Pérez');",
+                  "        pm.expect(json.balance).to.eql(500000);",
+                  "        pm.expect(json.notificationPreference).to.eql('EMAIL');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"+573001234567\",\n  \"password\": \"password123\",\n  \"notificationPreference\": \"EMAIL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "2. Registrar Cliente (SMS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María López\",\n  \"email\": \"maria@example.com\",\n  \"phone\": \"+573009876543\",\n  \"password\": \"password456\",\n  \"notificationPreference\": \"SMS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "3. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('clientId', json.clientId);",
+                  "    pm.test('Login exitoso - Token recibido', function () {",
+                  "        pm.expect(json.token).to.be.a('string');",
+                  "        pm.expect(json.clientId).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login - Credenciales Inválidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fondos",
+      "item": [
+        {
+          "name": "4. Listar Fondos (público)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 5 fondos', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    pm.expect(json.length).to.eql(5);",
+                  "});",
+                  "pm.test('Primer fondo es FPV_BTG_PACTUAL_RECAUDADORA', function () {",
+                  "    var json = pm.response.json();",
+                  "    var fund = json.find(f => f.fundId === '1');",
+                  "    pm.expect(fund.name).to.eql('FPV_BTG_PACTUAL_RECAUDADORA');",
+                  "    pm.expect(fund.minimumAmount).to.eql(75000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/funds",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds"]
+            }
+          }
+        },
+        {
+          "name": "5. Suscribirse - FPV_BTG_PACTUAL_RECAUDADORA (75k)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Suscripción exitosa', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.type).to.eql('OPENING');",
+                  "    pm.expect(json.fundName).to.eql('FPV_BTG_PACTUAL_RECAUDADORA');",
+                  "    pm.expect(json.amount).to.eql(75000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/1/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "1", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "6. Suscribirse - DEUDAPRIVADA (50k)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Suscripción exitosa', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.fundName).to.eql('DEUDAPRIVADA');",
+                  "    pm.expect(json.amount).to.eql(50000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/3/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "3", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "7. Suscribirse - FPV_BTG_PACTUAL_DINAMICA (100k)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Suscripción exitosa', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.fundName).to.eql('FPV_BTG_PACTUAL_DINAMICA');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/5/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "5", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "Suscribirse - Saldo Insuficiente (FDO-ACCIONES 250k)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400 - Saldo insuficiente', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.eql('INSUFFICIENT_BALANCE');",
+                  "    pm.expect(json.message).to.include('No tiene saldo disponible');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/4/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "4", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "Suscribirse - Duplicada (fondo 1 otra vez)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 409 - Suscripción duplicada', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.eql('DUPLICATE_SUBSCRIPTION');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/1/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "1", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "Suscribirse - Fondo Inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/999/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "999", "subscribe"]
+            }
+          }
+        },
+        {
+          "name": "8. Ver Suscripciones Activas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe tener suscripciones activas', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    pm.expect(json.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "subscriptions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transacciones",
+      "item": [
+        {
+          "name": "9. Ver Historial de Transacciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar transacciones', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    pm.expect(json.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cancelación",
+      "item": [
+        {
+          "name": "10. Cancelar Suscripción - FPV_BTG_PACTUAL_RECAUDADORA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Cancelación exitosa', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.type).to.eql('CANCELLATION');",
+                  "    pm.expect(json.fundName).to.eql('FPV_BTG_PACTUAL_RECAUDADORA');",
+                  "    pm.expect(json.amount).to.eql(75000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/1/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "1", "cancel"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar - Sin Suscripción Activa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 404 - No hay suscripción', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/1/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "1", "cancel"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cliente",
+      "item": [
+        {
+          "name": "11. Ver Perfil y Saldo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar perfil del cliente', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.name).to.eql('Juan Pérez');",
+                  "    pm.expect(json.email).to.eql('juan@example.com');",
+                  "    pm.expect(json.balance).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", "me"]
+            }
+          }
+        },
+        {
+          "name": "Sin Token - Debe fallar 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 403 sin autenticación', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/clients/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clients", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validaciones",
+      "item": [
+        {
+          "name": "Registro - Email Inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400 - Validación', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.eql('VALIDATION_ERROR');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test\",\n  \"email\": \"no-es-email\",\n  \"phone\": \"+57300\",\n  \"password\": \"12345678\",\n  \"notificationPreference\": \"EMAIL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Registro - Campos Vacíos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400 - Validación', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Registro - Contraseña Corta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400 - Password min 8 chars', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"+573001111111\",\n  \"password\": \"123\",\n  \"notificationPreference\": \"EMAIL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Registro - Email Duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Debe retornar 400 - Email duplicado', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('Ya existe');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicado\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"+573002222222\",\n  \"password\": \"password123\",\n  \"notificationPreference\": \"EMAIL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

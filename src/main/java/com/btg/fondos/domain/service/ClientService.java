@@ -1,4 +1,4 @@
-package com.btg.fondos.application.service;
+package com.btg.fondos.domain.service;
 
 import com.btg.fondos.domain.model.Client;
 import com.btg.fondos.domain.port.in.ClientUseCase;

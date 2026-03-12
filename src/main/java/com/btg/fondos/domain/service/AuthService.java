@@ -1,4 +1,4 @@
-package com.btg.fondos.application.service;
+package com.btg.fondos.domain.service;
 
 import com.btg.fondos.domain.exception.BusinessException;
 import com.btg.fondos.domain.model.Client;
