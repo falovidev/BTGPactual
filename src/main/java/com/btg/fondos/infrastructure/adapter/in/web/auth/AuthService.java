@@ -32,16 +32,10 @@ public class AuthService {
             throw new BusinessException("Ya existe un cliente registrado con el email: " + email);
         }
 
-        Client client = Client.builder()
-                .clientId(UUID.randomUUID().toString())
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .balance(initialBalance)
-                .notificationPreference(notificationPreference)
-                .password(passwordEncoder.encode(password))
-                .role(Role.USER)
-                .build();
+        Client client = new Client(
+                UUID.randomUUID().toString(), name, email, phone,
+                initialBalance, notificationPreference,
+                passwordEncoder.encode(password), Role.USER);
 
         return clientRepository.save(client);
     }

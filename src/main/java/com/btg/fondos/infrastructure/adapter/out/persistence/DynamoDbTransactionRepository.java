@@ -53,14 +53,11 @@ public class DynamoDbTransactionRepository implements TransactionRepository {
     }
 
     private Transaction toDomain(TransactionEntity entity) {
-        return Transaction.builder()
-                .transactionId(entity.getTransactionId())
-                .clientId(entity.getClientId())
-                .fundId(entity.getFundId())
-                .fundName(entity.getFundName())
-                .type(TransactionType.valueOf(entity.getType()))
-                .amount(new BigDecimal(entity.getAmount().toString()))
-                .timestamp(Instant.parse(entity.getTimestamp()))
-                .build();
+        return new Transaction(
+                entity.getTransactionId(), entity.getClientId(),
+                entity.getFundId(), entity.getFundName(),
+                TransactionType.valueOf(entity.getType()),
+                new BigDecimal(entity.getAmount().toString()),
+                Instant.parse(entity.getTimestamp()));
     }
 }

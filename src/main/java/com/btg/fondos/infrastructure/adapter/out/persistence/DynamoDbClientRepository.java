@@ -65,15 +65,9 @@ public class DynamoDbClientRepository implements ClientRepository {
     }
 
     private Client toDomain(ClientEntity entity) {
-        return Client.builder()
-                .clientId(entity.getClientId())
-                .name(entity.getName())
-                .email(entity.getEmail())
-                .phone(entity.getPhone())
-                .balance(entity.getBalance())
-                .notificationPreference(NotificationType.valueOf(entity.getNotificationPreference()))
-                .password(entity.getPassword())
-                .role(Role.valueOf(entity.getRole()))
-                .build();
+        return new Client(
+                entity.getClientId(), entity.getName(), entity.getEmail(), entity.getPhone(),
+                entity.getBalance(), NotificationType.valueOf(entity.getNotificationPreference()),
+                entity.getPassword(), Role.valueOf(entity.getRole()));
     }
 }

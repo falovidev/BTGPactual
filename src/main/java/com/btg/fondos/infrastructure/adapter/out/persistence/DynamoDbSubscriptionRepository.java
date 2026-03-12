@@ -61,12 +61,9 @@ public class DynamoDbSubscriptionRepository implements SubscriptionRepository {
     }
 
     private Subscription toDomain(SubscriptionEntity entity) {
-        return Subscription.builder()
-                .clientId(entity.getClientId())
-                .fundId(entity.getFundId())
-                .fundName(entity.getFundName())
-                .amount(new BigDecimal(entity.getAmount().toString()))
-                .subscribedAt(Instant.parse(entity.getSubscribedAt()))
-                .build();
+        return new Subscription(
+                entity.getClientId(), entity.getFundId(), entity.getFundName(),
+                new BigDecimal(entity.getAmount().toString()),
+                Instant.parse(entity.getSubscribedAt()));
     }
 }

@@ -48,11 +48,8 @@ public class DynamoDbFundRepository implements FundRepository {
     }
 
     private Fund toDomain(FundEntity entity) {
-        return Fund.builder()
-                .fundId(entity.getFundId())
-                .name(entity.getName())
-                .minimumAmount(entity.getMinimumAmount())
-                .category(entity.getCategory())
-                .build();
+        return new Fund(
+                entity.getFundId(), entity.getName(),
+                entity.getMinimumAmount(), entity.getCategory());
     }
 }

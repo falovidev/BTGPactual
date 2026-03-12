@@ -30,17 +30,14 @@ class GetTransactionHistoryServiceTest {
     @Test
     @DisplayName("Debe retornar historial de transacciones del cliente")
     void shouldReturnTransactionHistory() {
-        Client client = Client.builder()
-                .clientId("client-1")
-                .name("Juan Pérez")
-                .balance(new BigDecimal("500000"))
-                .build();
+        Client client = new Client("client-1", "Juan Pérez", null, null,
+                new BigDecimal("500000"), null, null, null);
 
         var transactions = List.of(
-                Transaction.builder().transactionId("tx-1").clientId("client-1")
-                        .type(TransactionType.OPENING).build(),
-                Transaction.builder().transactionId("tx-2").clientId("client-1")
-                        .type(TransactionType.CANCELLATION).build()
+                new Transaction("tx-1", "client-1", null, null,
+                        TransactionType.OPENING, null, null),
+                new Transaction("tx-2", "client-1", null, null,
+                        TransactionType.CANCELLATION, null, null)
         );
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(client));
         when(transactionRepository.findByClientId("client-1")).thenReturn(transactions);

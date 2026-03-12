@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,14 +22,20 @@ public class CancelFundService {
         Fund fund = findFund(fundId);
         Subscription subscription = findActiveSubscription(clientId, fundId, fund.getName());
 
-        refundBalance(client, subscription.getAmount());
+        client.refund(subscription.getAmount());
+        clientRepository.save(client);
+
         subscriptionRepository.delete(clientId, fundId);
-        Transaction transaction = createTransaction(clientId, fund, subscription.getAmount());
+
+        Transaction transaction = Transaction.createCancellation(clientId, fund, subscription.getAmount());
+        transactionRepository.save(transaction);
 
         log.info("Cliente {} canceló suscripción al fondo {}. Monto devuelto: {}",
                 clientId, fund.getName(), subscription.getAmount());
         return transaction;
     }
+
+    //region Métodos privados
 
     private Client findClient(String clientId) {
         return clientRepository.findById(clientId)
@@ -49,22 +52,5 @@ public class CancelFundService {
                 .orElseThrow(() -> new SubscriptionNotFoundException(fundName));
     }
 
-    private void refundBalance(Client client, java.math.BigDecimal amount) {
-        client.setBalance(client.getBalance().add(amount));
-        clientRepository.save(client);
-    }
-
-    private Transaction createTransaction(String clientId, Fund fund, java.math.BigDecimal amount) {
-        Transaction transaction = Transaction.builder()
-                .transactionId(UUID.randomUUID().toString())
-                .clientId(clientId)
-                .fundId(fund.getFundId())
-                .fundName(fund.getName())
-                .type(TransactionType.CANCELLATION)
-                .amount(amount)
-                .timestamp(Instant.now())
-                .build();
-        transactionRepository.save(transaction);
-        return transaction;
-    }
+    //endregion
 }

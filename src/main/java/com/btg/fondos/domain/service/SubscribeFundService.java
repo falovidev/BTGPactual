@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,17 +23,23 @@ public class SubscribeFundService {
         Fund fund = findFund(fundId);
 
         validateNoDuplicateSubscription(clientId, fundId, fund.getName());
-        validateSufficientBalance(client, fund);
 
-        debitBalance(client, fund.getMinimumAmount());
-        createSubscription(clientId, fund);
-        Transaction transaction = createTransaction(clientId, fund);
+        client.debit(fund.getMinimumAmount(), fund.getName());
+        clientRepository.save(client);
+
+        Subscription subscription = Subscription.create(clientId, fund);
+        subscriptionRepository.save(subscription);
+
+        Transaction transaction = Transaction.createOpening(clientId, fund);
+        transactionRepository.save(transaction);
 
         sendNotification(client, fund);
 
         log.info("Cliente {} suscrito al fondo {} por {}", clientId, fund.getName(), fund.getMinimumAmount());
         return transaction;
     }
+
+    //region Métodos privados
 
     private Client findClient(String clientId) {
         return clientRepository.findById(clientId)
@@ -53,42 +56,6 @@ public class SubscribeFundService {
                 .ifPresent(s -> { throw new DuplicateSubscriptionException(fundName); });
     }
 
-    private void validateSufficientBalance(Client client, Fund fund) {
-        if (client.getBalance().compareTo(fund.getMinimumAmount()) < 0) {
-            throw new InsufficientBalanceException(fund.getName());
-        }
-    }
-
-    private void debitBalance(Client client, java.math.BigDecimal amount) {
-        client.setBalance(client.getBalance().subtract(amount));
-        clientRepository.save(client);
-    }
-
-    private void createSubscription(String clientId, Fund fund) {
-        Subscription subscription = Subscription.builder()
-                .clientId(clientId)
-                .fundId(fund.getFundId())
-                .fundName(fund.getName())
-                .amount(fund.getMinimumAmount())
-                .subscribedAt(Instant.now())
-                .build();
-        subscriptionRepository.save(subscription);
-    }
-
-    private Transaction createTransaction(String clientId, Fund fund) {
-        Transaction transaction = Transaction.builder()
-                .transactionId(UUID.randomUUID().toString())
-                .clientId(clientId)
-                .fundId(fund.getFundId())
-                .fundName(fund.getName())
-                .type(TransactionType.OPENING)
-                .amount(fund.getMinimumAmount())
-                .timestamp(Instant.now())
-                .build();
-        transactionRepository.save(transaction);
-        return transaction;
-    }
-
     private void sendNotification(Client client, Fund fund) {
         String subject = "Suscripción exitosa - BTG Pactual";
         String message = String.format(
@@ -101,4 +68,6 @@ public class SubscribeFundService {
             log.error("Error enviando notificación al cliente {}: {}", client.getClientId(), e.getMessage());
         }
     }
+
+    //endregion
 }

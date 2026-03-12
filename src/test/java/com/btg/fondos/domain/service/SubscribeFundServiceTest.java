@@ -41,29 +41,14 @@ class SubscribeFundServiceTest {
 
     @BeforeEach
     void setUp() {
-        defaultClient = Client.builder()
-                .clientId("client-1")
-                .name("Juan Pérez")
-                .email("juan@test.com")
-                .phone("+573001234567")
-                .balance(new BigDecimal("500000"))
-                .notificationPreference(NotificationType.EMAIL)
-                .role(Role.USER)
-                .build();
+        defaultClient = new Client("client-1", "Juan Pérez", "juan@test.com", "+573001234567",
+                new BigDecimal("500000"), NotificationType.EMAIL, null, Role.USER);
 
-        fundRecaudadora = Fund.builder()
-                .fundId("1")
-                .name("FPV_BTG_PACTUAL_RECAUDADORA")
-                .minimumAmount(new BigDecimal("75000"))
-                .category("FPV")
-                .build();
+        fundRecaudadora = new Fund("1", "FPV_BTG_PACTUAL_RECAUDADORA",
+                new BigDecimal("75000"), "FPV");
 
-        fundAcciones = Fund.builder()
-                .fundId("4")
-                .name("FDO-ACCIONES")
-                .minimumAmount(new BigDecimal("250000"))
-                .category("FIC")
-                .build();
+        fundAcciones = new Fund("4", "FDO-ACCIONES",
+                new BigDecimal("250000"), "FIC");
     }
 
     @Test
@@ -90,8 +75,9 @@ class SubscribeFundServiceTest {
     @Test
     @DisplayName("Debe lanzar excepción cuando el saldo es insuficiente")
     void shouldThrowWhenInsufficientBalance() {
-        defaultClient.setBalance(new BigDecimal("50000"));
-        when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
+        Client poorClient = new Client("client-1", "Juan Pérez", "juan@test.com", "+573001234567",
+                new BigDecimal("50000"), NotificationType.EMAIL, null, Role.USER);
+        when(clientRepository.findById("client-1")).thenReturn(Optional.of(poorClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
         when(subscriptionRepository.findByClientIdAndFundId("client-1", "1")).thenReturn(Optional.empty());
 
@@ -116,8 +102,7 @@ class SubscribeFundServiceTest {
     @Test
     @DisplayName("Debe lanzar excepción cuando ya está suscrito al fondo")
     void shouldThrowWhenAlreadySubscribed() {
-        Subscription existing = Subscription.builder()
-                .clientId("client-1").fundId("1").build();
+        Subscription existing = new Subscription("client-1", "1", null, null, null);
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
         when(subscriptionRepository.findByClientIdAndFundId("client-1", "1"))

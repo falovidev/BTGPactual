@@ -37,33 +37,18 @@ class CancelFundServiceTest {
 
     @BeforeEach
     void setUp() {
-        defaultClient = Client.builder()
-                .clientId("client-1")
-                .name("Juan Pérez")
-                .email("juan@test.com")
-                .phone("+573001234567")
-                .balance(new BigDecimal("425000"))
-                .notificationPreference(NotificationType.EMAIL)
-                .role(Role.USER)
-                .build();
+        defaultClient = new Client("client-1", "Juan Pérez", "juan@test.com", "+573001234567",
+                new BigDecimal("425000"), NotificationType.EMAIL, null, Role.USER);
 
-        fundRecaudadora = Fund.builder()
-                .fundId("1")
-                .name("FPV_BTG_PACTUAL_RECAUDADORA")
-                .minimumAmount(new BigDecimal("75000"))
-                .category("FPV")
-                .build();
+        fundRecaudadora = new Fund("1", "FPV_BTG_PACTUAL_RECAUDADORA",
+                new BigDecimal("75000"), "FPV");
     }
 
     @Test
     @DisplayName("Debe cancelar y retornar el monto al saldo")
     void shouldCancelAndReturnBalance() {
-        Subscription sub = Subscription.builder()
-                .clientId("client-1").fundId("1")
-                .fundName("FPV_BTG_PACTUAL_RECAUDADORA")
-                .amount(new BigDecimal("75000"))
-                .subscribedAt(Instant.now())
-                .build();
+        Subscription sub = new Subscription("client-1", "1",
+                "FPV_BTG_PACTUAL_RECAUDADORA", new BigDecimal("75000"), Instant.now());
 
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
