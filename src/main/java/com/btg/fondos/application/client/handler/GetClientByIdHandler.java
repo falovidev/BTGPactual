@@ -1,7 +1,7 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.client.handler;
 
+import com.btg.fondos.application.client.query.GetClientByIdQuery;
 import com.btg.fondos.application.cqrs.QueryHandler;
-import com.btg.fondos.application.query.GetClientByIdQuery;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.client.port.ClientRepository;
 import lombok.RequiredArgsConstructor;

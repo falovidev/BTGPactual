@@ -1,6 +1,6 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.client.handler;
 
-import com.btg.fondos.application.command.RegisterClientCommand;
+import com.btg.fondos.application.client.command.RegisterClientCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.infrastructure.adapter.in.web.auth.AuthService;

@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.application.handler.GetTransactionHistoryHandler;
-import com.btg.fondos.application.query.GetTransactionHistoryQuery;
+import com.btg.fondos.application.transaction.handler.GetTransactionHistoryHandler;
+import com.btg.fondos.application.transaction.query.GetTransactionHistoryQuery;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.TransactionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

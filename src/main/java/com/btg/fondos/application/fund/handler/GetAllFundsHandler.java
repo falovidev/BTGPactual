@@ -1,7 +1,7 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.fund.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
-import com.btg.fondos.application.query.GetAllFundsQuery;
+import com.btg.fondos.application.fund.query.GetAllFundsQuery;
 import com.btg.fondos.domain.fund.model.Fund;
 import com.btg.fondos.domain.fund.port.FundRepository;
 import lombok.RequiredArgsConstructor;

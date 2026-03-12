@@ -1,7 +1,7 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.transaction.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
-import com.btg.fondos.application.query.GetTransactionHistoryQuery;
+import com.btg.fondos.application.transaction.query.GetTransactionHistoryQuery;
 import com.btg.fondos.domain.transaction.model.Transaction;
 import com.btg.fondos.domain.transaction.service.GetTransactionHistoryService;
 import lombok.RequiredArgsConstructor;

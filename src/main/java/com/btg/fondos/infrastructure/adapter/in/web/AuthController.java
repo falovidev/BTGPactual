@@ -1,9 +1,9 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.application.command.LoginCommand;
-import com.btg.fondos.application.command.RegisterClientCommand;
-import com.btg.fondos.application.handler.LoginHandler;
-import com.btg.fondos.application.handler.RegisterClientHandler;
+import com.btg.fondos.application.login.command.LoginCommand;
+import com.btg.fondos.application.client.command.RegisterClientCommand;
+import com.btg.fondos.application.login.handler.LoginHandler;
+import com.btg.fondos.application.client.handler.RegisterClientHandler;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.login.model.LoginResult;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.ClientResponse;

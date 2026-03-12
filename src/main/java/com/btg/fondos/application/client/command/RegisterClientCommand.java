@@ -1,4 +1,4 @@
-package com.btg.fondos.application.command;
+package com.btg.fondos.application.client.command;
 
 import com.btg.fondos.application.cqrs.Command;
 import com.btg.fondos.domain.notification.model.NotificationType;

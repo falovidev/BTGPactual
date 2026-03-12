@@ -1,4 +1,4 @@
-package com.btg.fondos.application.command;
+package com.btg.fondos.application.fund.command;
 
 import com.btg.fondos.application.cqrs.Command;
 

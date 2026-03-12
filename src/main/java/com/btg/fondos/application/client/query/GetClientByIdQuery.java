@@ -1,4 +1,4 @@
-package com.btg.fondos.application.query;
+package com.btg.fondos.application.client.query;
 
 import com.btg.fondos.application.cqrs.Query;
 

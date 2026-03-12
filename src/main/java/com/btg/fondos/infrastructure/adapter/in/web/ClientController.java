@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.application.handler.GetClientByIdHandler;
-import com.btg.fondos.application.query.GetClientByIdQuery;
+import com.btg.fondos.application.client.handler.GetClientByIdHandler;
+import com.btg.fondos.application.client.query.GetClientByIdQuery;
 import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.ClientResponse;

@@ -1,13 +1,13 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.application.command.CancelSubscriptionCommand;
-import com.btg.fondos.application.command.SubscribeFundCommand;
-import com.btg.fondos.application.handler.CancelSubscriptionHandler;
-import com.btg.fondos.application.handler.GetAllFundsHandler;
-import com.btg.fondos.application.handler.GetClientSubscriptionsHandler;
-import com.btg.fondos.application.handler.SubscribeFundHandler;
-import com.btg.fondos.application.query.GetAllFundsQuery;
-import com.btg.fondos.application.query.GetClientSubscriptionsQuery;
+import com.btg.fondos.application.fund.command.CancelSubscriptionCommand;
+import com.btg.fondos.application.fund.command.SubscribeFundCommand;
+import com.btg.fondos.application.fund.handler.CancelSubscriptionHandler;
+import com.btg.fondos.application.fund.handler.GetAllFundsHandler;
+import com.btg.fondos.application.fund.handler.GetClientSubscriptionsHandler;
+import com.btg.fondos.application.fund.handler.SubscribeFundHandler;
+import com.btg.fondos.application.fund.query.GetAllFundsQuery;
+import com.btg.fondos.application.fund.query.GetClientSubscriptionsQuery;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.FundResponse;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.SubscriptionResponse;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.TransactionResponse;

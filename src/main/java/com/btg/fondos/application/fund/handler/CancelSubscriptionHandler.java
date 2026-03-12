@@ -1,6 +1,6 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.fund.handler;
 
-import com.btg.fondos.application.command.CancelSubscriptionCommand;
+import com.btg.fondos.application.fund.command.CancelSubscriptionCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
 import com.btg.fondos.domain.transaction.model.Transaction;
 import com.btg.fondos.domain.fund.service.CancelFundService;

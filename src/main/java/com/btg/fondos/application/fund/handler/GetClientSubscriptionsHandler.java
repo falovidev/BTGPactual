@@ -1,7 +1,7 @@
-package com.btg.fondos.application.handler;
+package com.btg.fondos.application.fund.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
-import com.btg.fondos.application.query.GetClientSubscriptionsQuery;
+import com.btg.fondos.application.fund.query.GetClientSubscriptionsQuery;
 import com.btg.fondos.domain.fund.model.Subscription;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
