@@ -105,7 +105,7 @@ src/main/java/com/btg/fondos/
 
 ### 1. Iniciar DynamoDB Local
 
-El proyecto incluye DynamoDB Local en `dynamodb-local/`. Abrir una terminal y ejecutar:
+Descargar [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html) y extraerlo en `dynamodb-local/`. Luego abrir una terminal y ejecutar:
 
 ```bash
 cd dynamodb-local

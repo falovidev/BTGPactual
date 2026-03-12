@@ -1,5 +1,6 @@
-package com.btg.fondos;
+package com.btg.fondos.infrastructure.adapter.in.lambda;
 
+import com.btg.fondos.FondosApplication;
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
 import com.amazonaws.serverless.proxy.model.HttpApiV2ProxyRequest;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
