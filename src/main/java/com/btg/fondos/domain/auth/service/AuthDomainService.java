@@ -1,30 +1,25 @@
-package com.btg.fondos.infrastructure.adapter.in.web.auth;
+package com.btg.fondos.domain.auth.service;
 
-import com.btg.fondos.domain.exception.BusinessException;
+import com.btg.fondos.domain.auth.port.PasswordEncoderPort;
+import com.btg.fondos.domain.auth.port.TokenPort;
 import com.btg.fondos.domain.client.model.Client;
-import com.btg.fondos.domain.login.model.LoginResult;
-import com.btg.fondos.domain.notification.model.NotificationType;
 import com.btg.fondos.domain.client.model.Role;
 import com.btg.fondos.domain.client.port.ClientRepository;
-import com.btg.fondos.infrastructure.security.JwtProvider;
+import com.btg.fondos.domain.exception.BusinessException;
+import com.btg.fondos.domain.login.model.LoginResult;
+import com.btg.fondos.domain.notification.model.NotificationType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthDomainService {
 
     private final ClientRepository clientRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
-
-    @Value("${app.client.initial-balance}")
-    private BigDecimal initialBalance;
+    private final PasswordEncoderPort passwordEncoder;
+    private final TokenPort tokenPort;
+    private final BigDecimal initialBalance;
 
     public Client register(String name, String email, String phone,
                            String password, NotificationType notificationPreference) {
@@ -48,7 +43,7 @@ public class AuthService {
             throw new BusinessException("Credenciales inválidas");
         }
 
-        String token = jwtProvider.generateToken(client.getClientId(), client.getEmail(), client.getRole().name());
+        String token = tokenPort.generateToken(client.getClientId(), client.getEmail(), client.getRole().name());
         return new LoginResult(token, client);
     }
 }
