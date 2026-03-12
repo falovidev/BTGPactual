@@ -1,8 +1,9 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
+import com.btg.fondos.application.handler.GetClientByIdHandler;
+import com.btg.fondos.application.query.GetClientByIdQuery;
 import com.btg.fondos.domain.exception.ClientNotFoundException;
 import com.btg.fondos.domain.model.Client;
-import com.btg.fondos.domain.port.in.ClientUseCase;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.ClientResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,14 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 public class ClientController {
 
-    private final ClientUseCase clientService;
+    private final GetClientByIdHandler getClientByIdHandler;
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Operation(summary = "Ver perfil", description = "Obtiene el perfil y saldo del cliente autenticado")
     public ResponseEntity<ClientResponse> getProfile(Authentication authentication) {
         String clientId = authentication.getName();
-        Client client = clientService.getClientById(clientId)
+        Client client = getClientByIdHandler.handle(new GetClientByIdQuery(clientId))
                 .orElseThrow(() -> new ClientNotFoundException(clientId));
         return ResponseEntity.ok(ClientResponse.from(client));
     }

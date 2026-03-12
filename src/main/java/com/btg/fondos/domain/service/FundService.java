@@ -2,7 +2,6 @@ package com.btg.fondos.domain.service;
 
 import com.btg.fondos.domain.exception.*;
 import com.btg.fondos.domain.model.*;
-import com.btg.fondos.domain.port.in.FundUseCase;
 import com.btg.fondos.domain.port.out.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FundService implements FundUseCase {
+public class FundService {
 
     private final FundRepository fundRepository;
     private final ClientRepository clientRepository;
@@ -23,7 +22,6 @@ public class FundService implements FundUseCase {
     private final TransactionRepository transactionRepository;
     private final NotificationPort notificationPort;
 
-    @Override
     public Transaction subscribe(String clientId, String fundId) {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new ClientNotFoundException(clientId));
@@ -67,7 +65,6 @@ public class FundService implements FundUseCase {
         return transaction;
     }
 
-    @Override
     public Transaction cancel(String clientId, String fundId) {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new ClientNotFoundException(clientId));
@@ -99,19 +96,16 @@ public class FundService implements FundUseCase {
         return transaction;
     }
 
-    @Override
     public List<Transaction> getTransactionHistory(String clientId) {
         clientRepository.findById(clientId)
                 .orElseThrow(() -> new ClientNotFoundException(clientId));
         return transactionRepository.findByClientId(clientId);
     }
 
-    @Override
     public List<Fund> getAllFunds() {
         return fundRepository.findAll();
     }
 
-    @Override
     public List<Subscription> getClientSubscriptions(String clientId) {
         return subscriptionRepository.findByClientId(clientId);
     }

@@ -1,6 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.domain.port.in.FundUseCase;
+import com.btg.fondos.application.handler.GetTransactionHistoryHandler;
+import com.btg.fondos.application.query.GetTransactionHistoryQuery;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.TransactionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,7 +23,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class TransactionController {
 
-    private final FundUseCase fundService;
+    private final GetTransactionHistoryHandler getTransactionHistoryHandler;
 
     @GetMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -30,7 +31,7 @@ public class TransactionController {
             description = "Obtiene todas las transacciones (aperturas y cancelaciones) del cliente autenticado")
     public ResponseEntity<List<TransactionResponse>> getTransactions(Authentication authentication) {
         String clientId = authentication.getName();
-        var transactions = fundService.getTransactionHistory(clientId).stream()
+        var transactions = getTransactionHistoryHandler.handle(new GetTransactionHistoryQuery(clientId)).stream()
                 .map(TransactionResponse::from)
                 .toList();
         return ResponseEntity.ok(transactions);

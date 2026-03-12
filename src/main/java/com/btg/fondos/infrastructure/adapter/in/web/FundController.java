@@ -1,6 +1,13 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.domain.port.in.FundUseCase;
+import com.btg.fondos.application.command.CancelSubscriptionCommand;
+import com.btg.fondos.application.command.SubscribeFundCommand;
+import com.btg.fondos.application.handler.CancelSubscriptionHandler;
+import com.btg.fondos.application.handler.GetAllFundsHandler;
+import com.btg.fondos.application.handler.GetClientSubscriptionsHandler;
+import com.btg.fondos.application.handler.SubscribeFundHandler;
+import com.btg.fondos.application.query.GetAllFundsQuery;
+import com.btg.fondos.application.query.GetClientSubscriptionsQuery;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.FundResponse;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.SubscriptionResponse;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.TransactionResponse;
@@ -23,12 +30,15 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class FundController {
 
-    private final FundUseCase fundService;
+    private final SubscribeFundHandler subscribeFundHandler;
+    private final CancelSubscriptionHandler cancelSubscriptionHandler;
+    private final GetAllFundsHandler getAllFundsHandler;
+    private final GetClientSubscriptionsHandler getClientSubscriptionsHandler;
 
     @GetMapping
     @Operation(summary = "Listar fondos", description = "Obtiene todos los fondos de inversión disponibles")
     public ResponseEntity<List<FundResponse>> getAllFunds() {
-        var funds = fundService.getAllFunds().stream()
+        var funds = getAllFundsHandler.handle(new GetAllFundsQuery()).stream()
                 .map(FundResponse::from)
                 .toList();
         return ResponseEntity.ok(funds);
@@ -40,7 +50,7 @@ public class FundController {
     public ResponseEntity<TransactionResponse> subscribe(@PathVariable String fundId,
                                                           Authentication authentication) {
         String clientId = authentication.getName();
-        var transaction = fundService.subscribe(clientId, fundId);
+        var transaction = subscribeFundHandler.handle(new SubscribeFundCommand(clientId, fundId));
         return ResponseEntity.status(HttpStatus.CREATED).body(TransactionResponse.from(transaction));
     }
 
@@ -50,7 +60,7 @@ public class FundController {
     public ResponseEntity<TransactionResponse> cancel(@PathVariable String fundId,
                                                        Authentication authentication) {
         String clientId = authentication.getName();
-        var transaction = fundService.cancel(clientId, fundId);
+        var transaction = cancelSubscriptionHandler.handle(new CancelSubscriptionCommand(clientId, fundId));
         return ResponseEntity.ok(TransactionResponse.from(transaction));
     }
 
@@ -59,7 +69,7 @@ public class FundController {
     @Operation(summary = "Ver suscripciones activas", description = "Lista los fondos a los que está suscrito el cliente")
     public ResponseEntity<List<SubscriptionResponse>> getSubscriptions(Authentication authentication) {
         String clientId = authentication.getName();
-        var subs = fundService.getClientSubscriptions(clientId).stream()
+        var subs = getClientSubscriptionsHandler.handle(new GetClientSubscriptionsQuery(clientId)).stream()
                 .map(SubscriptionResponse::from)
                 .toList();
         return ResponseEntity.ok(subs);
