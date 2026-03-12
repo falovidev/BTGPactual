@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class FundController {
     }
 
     @PostMapping("/{fundId}/subscribe")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Operation(summary = "Suscribirse a un fondo", description = "Vincula al cliente autenticado con el fondo especificado")
     public ResponseEntity<TransactionResponse> subscribe(@PathVariable String fundId,
                                                           Authentication authentication) {
@@ -43,6 +45,7 @@ public class FundController {
     }
 
     @DeleteMapping("/{fundId}/cancel")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Operation(summary = "Cancelar suscripción", description = "Cancela la vinculación al fondo y retorna el monto al saldo")
     public ResponseEntity<TransactionResponse> cancel(@PathVariable String fundId,
                                                        Authentication authentication) {
@@ -52,6 +55,7 @@ public class FundController {
     }
 
     @GetMapping("/subscriptions")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @Operation(summary = "Ver suscripciones activas", description = "Lista los fondos a los que está suscrito el cliente")
     public ResponseEntity<List<SubscriptionResponse>> getSubscriptions(Authentication authentication) {
         String clientId = authentication.getName();
