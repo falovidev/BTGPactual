@@ -127,7 +127,3 @@ Esto elimina: Lambda, API Gateway, tablas DynamoDB, topic SNS y roles IAM.
 - **CORS**: Configurado a nivel de API Gateway
 - **Perfiles Spring**: `aws` se activa automáticamente en Lambda
 - **Variables de entorno**: JWT secret, ARN de SNS, nombres de tablas — todo inyectado por CloudFormation
-
-## Alternativa: Despliegue con Docker (ECS Fargate)
-
-El proyecto también incluye un `Dockerfile` y templates CloudFormation para despliegue en ECS Fargate (`cloudformation/template.yaml`). Esta opción tiene un costo de ~$10/mes (Fargate no tiene free tier) y es más adecuada para cargas de trabajo con tráfico constante.
