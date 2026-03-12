@@ -276,6 +276,36 @@
           }
         },
         {
+          "name": "7b. Suscribirse - FPV_BTG_PACTUAL_ECOPETROL (125k)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Suscripción exitosa', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.fundName).to.eql('FPV_BTG_PACTUAL_ECOPETROL');",
+                  "    pm.expect(json.amount).to.eql(125000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/funds/2/subscribe",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "funds", "2", "subscribe"]
+            }
+          }
+        },
+        {
           "name": "Suscribirse - Saldo Insuficiente (FDO-ACCIONES 250k)",
           "event": [
             {
