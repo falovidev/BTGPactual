@@ -22,45 +22,70 @@ public class SubscribeFundService {
     private final NotificationPort notificationPort;
 
     public Transaction subscribe(String clientId, String fundId) {
-        Client client = clientRepository.findById(clientId)
+        Client client = findClient(clientId);
+        Fund fund = findFund(fundId);
+
+        validateNoDuplicateSubscription(clientId, fundId, fund.getName());
+        validateSufficientBalance(client, fund);
+
+        debitBalance(client, fund.getMinimumAmount());
+        createSubscription(clientId, fund);
+        Transaction transaction = createTransaction(clientId, fund);
+
+        sendNotification(client, fund);
+
+        log.info("Cliente {} suscrito al fondo {} por {}", clientId, fund.getName(), fund.getMinimumAmount());
+        return transaction;
+    }
+
+    private Client findClient(String clientId) {
+        return clientRepository.findById(clientId)
                 .orElseThrow(() -> new ClientNotFoundException(clientId));
+    }
 
-        Fund fund = fundRepository.findById(fundId)
+    private Fund findFund(String fundId) {
+        return fundRepository.findById(fundId)
                 .orElseThrow(() -> new FundNotFoundException(fundId));
+    }
 
+    private void validateNoDuplicateSubscription(String clientId, String fundId, String fundName) {
         subscriptionRepository.findByClientIdAndFundId(clientId, fundId)
-                .ifPresent(s -> { throw new DuplicateSubscriptionException(fund.getName()); });
+                .ifPresent(s -> { throw new DuplicateSubscriptionException(fundName); });
+    }
 
+    private void validateSufficientBalance(Client client, Fund fund) {
         if (client.getBalance().compareTo(fund.getMinimumAmount()) < 0) {
             throw new InsufficientBalanceException(fund.getName());
         }
+    }
 
-        client.setBalance(client.getBalance().subtract(fund.getMinimumAmount()));
+    private void debitBalance(Client client, java.math.BigDecimal amount) {
+        client.setBalance(client.getBalance().subtract(amount));
         clientRepository.save(client);
+    }
 
+    private void createSubscription(String clientId, Fund fund) {
         Subscription subscription = Subscription.builder()
                 .clientId(clientId)
-                .fundId(fundId)
+                .fundId(fund.getFundId())
                 .fundName(fund.getName())
                 .amount(fund.getMinimumAmount())
                 .subscribedAt(Instant.now())
                 .build();
         subscriptionRepository.save(subscription);
+    }
 
+    private Transaction createTransaction(String clientId, Fund fund) {
         Transaction transaction = Transaction.builder()
                 .transactionId(UUID.randomUUID().toString())
                 .clientId(clientId)
-                .fundId(fundId)
+                .fundId(fund.getFundId())
                 .fundName(fund.getName())
                 .type(TransactionType.OPENING)
                 .amount(fund.getMinimumAmount())
                 .timestamp(Instant.now())
                 .build();
         transactionRepository.save(transaction);
-
-        sendNotification(client, fund);
-
-        log.info("Cliente {} suscrito al fondo {} por {}", clientId, fund.getName(), fund.getMinimumAmount());
         return transaction;
     }
 
