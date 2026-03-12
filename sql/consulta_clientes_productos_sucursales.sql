@@ -8,35 +8,35 @@
 -- algún producto disponible solo en las sucursales que visitan.
 -- ============================================================
 
--- Se asumen las siguientes tablas:
---   CLIENTES(id_cliente, nombre, ...)
---   SUCURSALES(id_sucursal, nombre, ...)
---   PRODUCTOS(id_producto, nombre, ...)
---   VISITAS(id_cliente, id_sucursal)           -- sucursales que visita cada cliente
---   PRODUCTOS_SUCURSAL(id_sucursal, id_producto)  -- productos disponibles por sucursal
---   INSCRIPCIONES(id_cliente, id_producto)      -- productos inscritos por el cliente
+-- Tablas del modelo (según diagrama ER):
+--   cliente(id, nombre, apellidos, ciudad)
+--   producto(id, nombre, tipoProducto)
+--   sucursal(id, nombre, ciudad)
+--   inscripcion(idProducto PK/FK, idCliente PK/FK)
+--   disponibilidad(idSucursal PK/FK, idProducto PK/FK)
+--   visitan(idSucursal PK/FK, idCliente PK/FK, fechaVisita)
 
 SELECT DISTINCT c.nombre
-FROM CLIENTES c
+FROM cliente c
 -- Productos inscritos por el cliente
-INNER JOIN INSCRIPCIONES i ON c.id_cliente = i.id_cliente
+INNER JOIN inscripcion i ON c.id = i.idCliente
 -- Verificamos que el producto esté disponible SOLO en sucursales que el cliente visita.
 -- Esto significa: no existe ninguna sucursal que ofrezca ese producto y que el cliente NO visite.
 WHERE NOT EXISTS (
     -- Sucursales donde está disponible el producto inscrito
     SELECT 1
-    FROM PRODUCTOS_SUCURSAL ps
-    WHERE ps.id_producto = i.id_producto
-      AND ps.id_sucursal NOT IN (
+    FROM disponibilidad d
+    WHERE d.idProducto = i.idProducto
+      AND d.idSucursal NOT IN (
           -- Sucursales que visita el cliente
-          SELECT v.id_sucursal
-          FROM VISITAS v
-          WHERE v.id_cliente = c.id_cliente
+          SELECT v.idSucursal
+          FROM visitan v
+          WHERE v.idCliente = c.id
       )
 )
 -- Además, el producto debe estar disponible en al menos una sucursal
 AND EXISTS (
     SELECT 1
-    FROM PRODUCTOS_SUCURSAL ps2
-    WHERE ps2.id_producto = i.id_producto
+    FROM disponibilidad d2
+    WHERE d2.idProducto = i.idProducto
 );
