@@ -105,7 +105,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub fondos-api-${Environment}
-      Handler: com.btg.fondos.StreamLambdaHandler::handleRequest
+      Handler: com.btg.fondos.infrastructure.adapter.in.lambda.StreamLambdaHandler::handleRequest
       CodeUri: ../build/distributions/fondos-api-1.0.0.zip
       SnapStart:
         ApplyOn: PublishedVersions
