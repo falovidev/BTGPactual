@@ -1,6 +1,6 @@
 package com.btg.fondos.infrastructure.adapter.in.web.dto;
 
-import com.btg.fondos.domain.model.Fund;
+import com.btg.fondos.domain.fund.model.Fund;
 import lombok.Builder;
 import lombok.Data;
 

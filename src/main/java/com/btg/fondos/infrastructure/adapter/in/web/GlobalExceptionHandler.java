@@ -1,6 +1,11 @@
 package com.btg.fondos.infrastructure.adapter.in.web;
 
-import com.btg.fondos.domain.exception.*;
+import com.btg.fondos.domain.client.exception.ClientNotFoundException;
+import com.btg.fondos.domain.client.exception.InsufficientBalanceException;
+import com.btg.fondos.domain.exception.BusinessException;
+import com.btg.fondos.domain.fund.exception.DuplicateSubscriptionException;
+import com.btg.fondos.domain.fund.exception.FundNotFoundException;
+import com.btg.fondos.domain.fund.exception.SubscriptionNotFoundException;
 import com.btg.fondos.infrastructure.adapter.in.web.dto.ApiError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -2,8 +2,8 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
 import com.btg.fondos.application.query.GetClientSubscriptionsQuery;
-import com.btg.fondos.domain.model.Subscription;
-import com.btg.fondos.domain.port.out.SubscriptionRepository;
+import com.btg.fondos.domain.fund.model.Subscription;
+import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

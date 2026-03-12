@@ -1,7 +1,7 @@
 package com.btg.fondos.application.command;
 
 import com.btg.fondos.application.cqrs.Command;
-import com.btg.fondos.domain.model.NotificationType;
+import com.btg.fondos.domain.notification.model.NotificationType;
 
 public record RegisterClientCommand(
         String name,

@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.in.web.dto;
 
-import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.model.TransactionType;
+import com.btg.fondos.domain.transaction.model.Transaction;
+import com.btg.fondos.domain.transaction.model.TransactionType;
 import lombok.Builder;
 import lombok.Data;
 

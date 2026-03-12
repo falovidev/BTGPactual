@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence;
 
-import com.btg.fondos.domain.model.Fund;
-import com.btg.fondos.domain.port.out.FundRepository;
+import com.btg.fondos.domain.fund.model.Fund;
+import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.infrastructure.adapter.out.persistence.entity.FundEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

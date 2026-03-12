@@ -2,8 +2,8 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
 import com.btg.fondos.application.query.GetTransactionHistoryQuery;
-import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.service.GetTransactionHistoryService;
+import com.btg.fondos.domain.transaction.model.Transaction;
+import com.btg.fondos.domain.transaction.service.GetTransactionHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

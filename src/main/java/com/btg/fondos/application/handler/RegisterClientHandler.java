@@ -2,7 +2,7 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.command.RegisterClientCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
-import com.btg.fondos.domain.model.Client;
+import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.infrastructure.adapter.in.web.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

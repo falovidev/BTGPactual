@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.in.web.dto;
 
-import com.btg.fondos.domain.model.Client;
-import com.btg.fondos.domain.model.NotificationType;
+import com.btg.fondos.domain.client.model.Client;
+import com.btg.fondos.domain.notification.model.NotificationType;
 import lombok.Builder;
 import lombok.Data;
 

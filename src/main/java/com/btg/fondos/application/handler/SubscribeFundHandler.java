@@ -2,8 +2,8 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.command.SubscribeFundCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
-import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.service.SubscribeFundService;
+import com.btg.fondos.domain.transaction.model.Transaction;
+import com.btg.fondos.domain.fund.service.SubscribeFundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

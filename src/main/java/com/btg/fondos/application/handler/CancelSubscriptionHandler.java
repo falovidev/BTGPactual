@@ -2,8 +2,8 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.command.CancelSubscriptionCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
-import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.service.CancelFundService;
+import com.btg.fondos.domain.transaction.model.Transaction;
+import com.btg.fondos.domain.fund.service.CancelFundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,8 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence;
 
-import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.model.TransactionType;
-import com.btg.fondos.domain.port.out.TransactionRepository;
+import com.btg.fondos.domain.transaction.model.Transaction;
+import com.btg.fondos.domain.transaction.model.TransactionType;
+import com.btg.fondos.domain.transaction.port.TransactionRepository;
 import com.btg.fondos.infrastructure.adapter.out.persistence.entity.TransactionEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

@@ -1,11 +1,11 @@
 package com.btg.fondos.infrastructure.adapter.in.web.auth;
 
 import com.btg.fondos.domain.exception.BusinessException;
-import com.btg.fondos.domain.model.Client;
-import com.btg.fondos.domain.model.LoginResult;
-import com.btg.fondos.domain.model.NotificationType;
-import com.btg.fondos.domain.model.Role;
-import com.btg.fondos.domain.port.out.ClientRepository;
+import com.btg.fondos.domain.client.model.Client;
+import com.btg.fondos.domain.login.model.LoginResult;
+import com.btg.fondos.domain.notification.model.NotificationType;
+import com.btg.fondos.domain.client.model.Role;
+import com.btg.fondos.domain.client.port.ClientRepository;
 import com.btg.fondos.infrastructure.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

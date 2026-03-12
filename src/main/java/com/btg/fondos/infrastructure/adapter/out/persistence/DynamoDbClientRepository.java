@@ -1,9 +1,9 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence;
 
-import com.btg.fondos.domain.model.Client;
-import com.btg.fondos.domain.model.NotificationType;
-import com.btg.fondos.domain.model.Role;
-import com.btg.fondos.domain.port.out.ClientRepository;
+import com.btg.fondos.domain.client.model.Client;
+import com.btg.fondos.domain.notification.model.NotificationType;
+import com.btg.fondos.domain.client.model.Role;
+import com.btg.fondos.domain.client.port.ClientRepository;
 import com.btg.fondos.infrastructure.adapter.out.persistence.entity.ClientEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

@@ -2,8 +2,8 @@ package com.btg.fondos.application.handler;
 
 import com.btg.fondos.application.cqrs.QueryHandler;
 import com.btg.fondos.application.query.GetAllFundsQuery;
-import com.btg.fondos.domain.model.Fund;
-import com.btg.fondos.domain.port.out.FundRepository;
+import com.btg.fondos.domain.fund.model.Fund;
+import com.btg.fondos.domain.fund.port.FundRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

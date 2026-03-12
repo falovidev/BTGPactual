@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.out.notification;
 
-import com.btg.fondos.domain.model.Client;
-import com.btg.fondos.domain.port.out.NotificationPort;
+import com.btg.fondos.domain.client.model.Client;
+import com.btg.fondos.domain.notification.port.NotificationPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

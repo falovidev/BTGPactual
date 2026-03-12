@@ -1,7 +1,7 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence;
 
-import com.btg.fondos.domain.model.Subscription;
-import com.btg.fondos.domain.port.out.SubscriptionRepository;
+import com.btg.fondos.domain.fund.model.Subscription;
+import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import com.btg.fondos.infrastructure.adapter.out.persistence.entity.SubscriptionEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

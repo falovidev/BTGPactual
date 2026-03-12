@@ -1,6 +1,6 @@
 package com.btg.fondos.infrastructure.adapter.in.web.dto;
 
-import com.btg.fondos.domain.model.NotificationType;
+import com.btg.fondos.domain.notification.model.NotificationType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
