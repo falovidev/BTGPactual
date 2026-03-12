@@ -1,5 +1,6 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence.entity;
 
+import com.btg.fondos.domain.transaction.model.Transaction;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 
 @DynamoDbBean
 public class TransactionEntity {
+
     private String transactionId;
     private String clientId;
     private String fundId;
@@ -38,4 +40,16 @@ public class TransactionEntity {
 
     public String getTimestamp() { return timestamp; }
     public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
+
+    public static TransactionEntity fromDomain(Transaction transaction) {
+        TransactionEntity entity = new TransactionEntity();
+        entity.setTransactionId(transaction.getTransactionId());
+        entity.setClientId(transaction.getClientId());
+        entity.setFundId(transaction.getFundId());
+        entity.setFundName(transaction.getFundName());
+        entity.setType(transaction.getType().name());
+        entity.setAmount(transaction.getAmount());
+        entity.setTimestamp(transaction.getTimestamp().toString());
+        return entity;
+    }
 }

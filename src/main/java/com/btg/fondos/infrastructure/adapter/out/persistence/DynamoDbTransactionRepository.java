@@ -41,15 +41,7 @@ public class DynamoDbTransactionRepository implements TransactionRepository {
     }
 
     private TransactionEntity toEntity(Transaction transaction) {
-        TransactionEntity entity = new TransactionEntity();
-        entity.setTransactionId(transaction.getTransactionId());
-        entity.setClientId(transaction.getClientId());
-        entity.setFundId(transaction.getFundId());
-        entity.setFundName(transaction.getFundName());
-        entity.setType(transaction.getType().name());
-        entity.setAmount(transaction.getAmount());
-        entity.setTimestamp(transaction.getTimestamp().toString());
-        return entity;
+        return TransactionEntity.fromDomain(transaction);
     }
 
     private Transaction toDomain(TransactionEntity entity) {

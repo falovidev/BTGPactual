@@ -1,5 +1,6 @@
 package com.btg.fondos.infrastructure.adapter.out.persistence.entity;
 
+import com.btg.fondos.domain.client.model.Client;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 
 @DynamoDbBean
 public class ClientEntity {
+
     private String clientId;
     private String name;
     private String email;
@@ -42,4 +44,17 @@ public class ClientEntity {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public static ClientEntity fromDomain(Client client) {
+        ClientEntity entity = new ClientEntity();
+        entity.setClientId(client.getClientId());
+        entity.setName(client.getName());
+        entity.setEmail(client.getEmail());
+        entity.setPhone(client.getPhone());
+        entity.setBalance(client.getBalance());
+        entity.setNotificationPreference(client.getNotificationPreference().name());
+        entity.setPassword(client.getPassword());
+        entity.setRole(client.getRole().name());
+        return entity;
+    }
 }

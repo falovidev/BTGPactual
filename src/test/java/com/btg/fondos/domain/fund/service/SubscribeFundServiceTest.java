@@ -11,9 +11,10 @@ import com.btg.fondos.domain.fund.model.Subscription;
 import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import com.btg.fondos.domain.notification.port.NotificationPort;
+import com.btg.fondos.domain.common.port.UnitOfWork;
+import com.btg.fondos.domain.common.port.UnitOfWorkFactory;
 import com.btg.fondos.domain.transaction.model.Transaction;
 import com.btg.fondos.domain.transaction.model.TransactionType;
-import com.btg.fondos.domain.transaction.port.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,8 @@ class SubscribeFundServiceTest {
     @Mock private FundRepository fundRepository;
     @Mock private ClientRepository clientRepository;
     @Mock private SubscriptionRepository subscriptionRepository;
-    @Mock private TransactionRepository transactionRepository;
+    @Mock private UnitOfWorkFactory unitOfWorkFactory;
+    @Mock private UnitOfWork unitOfWork;
     @Mock private NotificationPort notificationPort;
 
     @InjectMocks
@@ -69,7 +71,8 @@ class SubscribeFundServiceTest {
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
         when(subscriptionRepository.findByClientIdAndFundId("client-1", "1")).thenReturn(Optional.empty());
-        when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.save(any())).thenReturn(unitOfWork);
 
         Transaction result = subscribeFundService.subscribe("client-1", "1");
 
@@ -78,9 +81,8 @@ class SubscribeFundServiceTest {
         assertThat(result.getAmount()).isEqualByComparingTo(new BigDecimal("75000"));
         assertThat(defaultClient.getBalance()).isEqualByComparingTo(new BigDecimal("425000"));
 
-        verify(clientRepository).save(defaultClient);
-        verify(subscriptionRepository).save(any(Subscription.class));
-        verify(transactionRepository).save(any(Transaction.class));
+        verify(unitOfWork, times(3)).save(any());
+        verify(unitOfWork).commit();
         verify(notificationPort).sendNotification(eq(defaultClient), anyString(), anyString());
     }
 
@@ -96,8 +98,7 @@ class SubscribeFundServiceTest {
                 .isInstanceOf(InsufficientBalanceException.class)
                 .hasMessageContaining("No tiene saldo disponible para vincularse al fondo FPV_BTG_PACTUAL_RECAUDADORA");
 
-        verify(clientRepository, never()).save(any());
-        verify(transactionRepository, never()).save(any());
+        verify(unitOfWorkFactory, never()).create();
     }
 
     @Test
@@ -138,7 +139,8 @@ class SubscribeFundServiceTest {
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
         when(subscriptionRepository.findByClientIdAndFundId("client-1", "1")).thenReturn(Optional.empty());
-        when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.save(any())).thenReturn(unitOfWork);
 
         subscribeFundService.subscribe("client-1", "1");
         assertThat(defaultClient.getBalance()).isEqualByComparingTo(new BigDecimal("425000"));

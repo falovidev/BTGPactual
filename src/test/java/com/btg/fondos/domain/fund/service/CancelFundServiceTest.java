@@ -3,6 +3,8 @@ package com.btg.fondos.domain.fund.service;
 import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.client.port.ClientRepository;
+import com.btg.fondos.domain.common.port.UnitOfWork;
+import com.btg.fondos.domain.common.port.UnitOfWorkFactory;
 import com.btg.fondos.domain.fund.exception.FundNotFoundException;
 import com.btg.fondos.domain.fund.exception.SubscriptionNotFoundException;
 import com.btg.fondos.domain.fund.model.Fund;
@@ -11,7 +13,6 @@ import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import com.btg.fondos.domain.transaction.model.Transaction;
 import com.btg.fondos.domain.transaction.model.TransactionType;
-import com.btg.fondos.domain.transaction.port.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,8 @@ class CancelFundServiceTest {
     @Mock private FundRepository fundRepository;
     @Mock private ClientRepository clientRepository;
     @Mock private SubscriptionRepository subscriptionRepository;
-    @Mock private TransactionRepository transactionRepository;
+    @Mock private UnitOfWorkFactory unitOfWorkFactory;
+    @Mock private UnitOfWork unitOfWork;
 
     @InjectMocks
     private CancelFundService cancelFundService;
@@ -60,14 +62,19 @@ class CancelFundServiceTest {
         when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
         when(fundRepository.findById("1")).thenReturn(Optional.of(fundRecaudadora));
         when(subscriptionRepository.findByClientIdAndFundId("client-1", "1")).thenReturn(Optional.of(sub));
-        when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.save(any())).thenReturn(unitOfWork);
+        when(unitOfWork.delete(any(), any(), any())).thenReturn(unitOfWork);
 
         Transaction result = cancelFundService.cancel("client-1", "1");
 
         assertThat(result.getType()).isEqualTo(TransactionType.CANCELLATION);
         assertThat(defaultClient.getBalance()).isEqualByComparingTo(new BigDecimal("500000"));
 
-        verify(subscriptionRepository).delete("client-1", "1");
+        verify(unitOfWork).save(any(Client.class));
+        verify(unitOfWork).delete(Subscription.class, "client-1", "1");
+        verify(unitOfWork).save(any(Transaction.class));
+        verify(unitOfWork).commit();
     }
 
     @Test

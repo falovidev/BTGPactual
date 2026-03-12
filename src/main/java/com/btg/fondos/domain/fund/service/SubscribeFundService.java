@@ -7,11 +7,11 @@ import com.btg.fondos.domain.fund.exception.DuplicateSubscriptionException;
 import com.btg.fondos.domain.fund.exception.FundNotFoundException;
 import com.btg.fondos.domain.fund.model.Fund;
 import com.btg.fondos.domain.fund.model.Subscription;
+import com.btg.fondos.domain.common.port.UnitOfWorkFactory;
 import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import com.btg.fondos.domain.notification.port.NotificationPort;
 import com.btg.fondos.domain.transaction.model.Transaction;
-import com.btg.fondos.domain.transaction.port.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class SubscribeFundService {
     private final FundRepository fundRepository;
     private final ClientRepository clientRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final TransactionRepository transactionRepository;
+    private final UnitOfWorkFactory unitOfWorkFactory;
     private final NotificationPort notificationPort;
 
     public Transaction subscribe(String clientId, String fundId) {
@@ -34,13 +34,15 @@ public class SubscribeFundService {
         validateNoDuplicateSubscription(clientId, fundId, fund.getName());
 
         client.debit(fund.getMinimumAmount(), fund.getName());
-        clientRepository.save(client);
 
         Subscription subscription = Subscription.create(clientId, fund);
-        subscriptionRepository.save(subscription);
-
         Transaction transaction = Transaction.createOpening(clientId, fund);
-        transactionRepository.save(transaction);
+
+        unitOfWorkFactory.create()
+                .save(client)
+                .save(subscription)
+                .save(transaction)
+                .commit();
 
         sendNotification(client, fund);
 

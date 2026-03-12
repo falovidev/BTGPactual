@@ -99,7 +99,7 @@ src/main/java/com/btg/fondos/
 - **Autenticación**: JWT con expiración de 24 horas
 - **Autorización**: Roles USER/ADMIN con `@PreAuthorize`
 - **Encriptación**: BCrypt para contraseñas
-- **CORS**: Configurado para permitir orígenes específicos
+- **CORS**: Configurado para permitir todos los orígenes (facilita pruebas; ver sección de mejoras)
 - **Stateless**: Sin sesiones del lado del servidor
 
 ## Ejecutar Localmente
@@ -183,3 +183,11 @@ Resumen:
 | ECS Fargate | ~$10 |
 | ALB (primer año) | $0 |
 | **Total** | **~$10/mes** |
+
+## Mejoras para Producción
+
+Las siguientes mejoras fueron identificadas y se dejan documentadas como decisiones conscientes fuera del alcance de esta prueba técnica:
+
+- **CORS restringido**: Actualmente permite todos los orígenes (`*`) para facilitar las pruebas. En producción debe restringirse a los dominios del frontend.
+- **Tests de integración**: La cobertura actual se enfoca en dominio (100% mutation testing con PIT). En producción se agregarían tests de controllers, repositorios y flujos end-to-end.
+- **Notificación de cancelación**: Actualmente solo se notifica al suscribirse. Se podría agregar notificación al cancelar por simetría.

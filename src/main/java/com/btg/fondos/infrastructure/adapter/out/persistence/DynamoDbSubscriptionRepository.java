@@ -51,13 +51,7 @@ public class DynamoDbSubscriptionRepository implements SubscriptionRepository {
     }
 
     private SubscriptionEntity toEntity(Subscription subscription) {
-        SubscriptionEntity entity = new SubscriptionEntity();
-        entity.setClientId(subscription.getClientId());
-        entity.setFundId(subscription.getFundId());
-        entity.setFundName(subscription.getFundName());
-        entity.setAmount(subscription.getAmount());
-        entity.setSubscribedAt(subscription.getSubscribedAt().toString());
-        return entity;
+        return SubscriptionEntity.fromDomain(subscription);
     }
 
     private Subscription toDomain(SubscriptionEntity entity) {

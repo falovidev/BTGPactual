@@ -52,16 +52,7 @@ public class DynamoDbClientRepository implements ClientRepository {
     }
 
     private ClientEntity toEntity(Client client) {
-        ClientEntity entity = new ClientEntity();
-        entity.setClientId(client.getClientId());
-        entity.setName(client.getName());
-        entity.setEmail(client.getEmail());
-        entity.setPhone(client.getPhone());
-        entity.setBalance(client.getBalance());
-        entity.setNotificationPreference(client.getNotificationPreference().name());
-        entity.setPassword(client.getPassword());
-        entity.setRole(client.getRole().name());
-        return entity;
+        return ClientEntity.fromDomain(client);
     }
 
     private Client toDomain(ClientEntity entity) {

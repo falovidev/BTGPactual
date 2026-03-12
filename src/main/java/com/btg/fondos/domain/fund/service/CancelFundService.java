@@ -7,10 +7,10 @@ import com.btg.fondos.domain.fund.exception.FundNotFoundException;
 import com.btg.fondos.domain.fund.exception.SubscriptionNotFoundException;
 import com.btg.fondos.domain.fund.model.Fund;
 import com.btg.fondos.domain.fund.model.Subscription;
+import com.btg.fondos.domain.common.port.UnitOfWorkFactory;
 import com.btg.fondos.domain.fund.port.FundRepository;
 import com.btg.fondos.domain.fund.port.SubscriptionRepository;
 import com.btg.fondos.domain.transaction.model.Transaction;
-import com.btg.fondos.domain.transaction.port.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class CancelFundService {
     private final FundRepository fundRepository;
     private final ClientRepository clientRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final TransactionRepository transactionRepository;
+    private final UnitOfWorkFactory unitOfWorkFactory;
 
     public Transaction cancel(String clientId, String fundId) {
         Client client = findClient(clientId);
@@ -31,12 +31,14 @@ public class CancelFundService {
         Subscription subscription = findActiveSubscription(clientId, fundId, fund.getName());
 
         client.refund(subscription.getAmount());
-        clientRepository.save(client);
-
-        subscriptionRepository.delete(clientId, fundId);
 
         Transaction transaction = Transaction.createCancellation(clientId, fund, subscription.getAmount());
-        transactionRepository.save(transaction);
+
+        unitOfWorkFactory.create()
+                .save(client)
+                .delete(Subscription.class, clientId, fundId)
+                .save(transaction)
+                .commit();
 
         log.info("Cliente {} canceló suscripción al fondo {}. Monto devuelto: {}",
                 clientId, fund.getName(), subscription.getAmount());
