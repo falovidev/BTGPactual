@@ -8,13 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FundService {
+public class SubscribeFundService {
 
     private final FundRepository fundRepository;
     private final ClientRepository clientRepository;
@@ -59,58 +58,13 @@ public class FundService {
                 .build();
         transactionRepository.save(transaction);
 
-        sendSubscriptionNotification(client, fund);
+        sendNotification(client, fund);
 
         log.info("Cliente {} suscrito al fondo {} por {}", clientId, fund.getName(), fund.getMinimumAmount());
         return transaction;
     }
 
-    public Transaction cancel(String clientId, String fundId) {
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new ClientNotFoundException(clientId));
-
-        Fund fund = fundRepository.findById(fundId)
-                .orElseThrow(() -> new FundNotFoundException(fundId));
-
-        Subscription subscription = subscriptionRepository.findByClientIdAndFundId(clientId, fundId)
-                .orElseThrow(() -> new SubscriptionNotFoundException(fund.getName()));
-
-        client.setBalance(client.getBalance().add(subscription.getAmount()));
-        clientRepository.save(client);
-
-        subscriptionRepository.delete(clientId, fundId);
-
-        Transaction transaction = Transaction.builder()
-                .transactionId(UUID.randomUUID().toString())
-                .clientId(clientId)
-                .fundId(fundId)
-                .fundName(fund.getName())
-                .type(TransactionType.CANCELLATION)
-                .amount(subscription.getAmount())
-                .timestamp(Instant.now())
-                .build();
-        transactionRepository.save(transaction);
-
-        log.info("Cliente {} canceló suscripción al fondo {}. Monto devuelto: {}",
-                clientId, fund.getName(), subscription.getAmount());
-        return transaction;
-    }
-
-    public List<Transaction> getTransactionHistory(String clientId) {
-        clientRepository.findById(clientId)
-                .orElseThrow(() -> new ClientNotFoundException(clientId));
-        return transactionRepository.findByClientId(clientId);
-    }
-
-    public List<Fund> getAllFunds() {
-        return fundRepository.findAll();
-    }
-
-    public List<Subscription> getClientSubscriptions(String clientId) {
-        return subscriptionRepository.findByClientId(clientId);
-    }
-
-    private void sendSubscriptionNotification(Client client, Fund fund) {
+    private void sendNotification(Client client, Fund fund) {
         String subject = "Suscripción exitosa - BTG Pactual";
         String message = String.format(
                 "Estimado(a) %s, se ha suscrito exitosamente al fondo %s por un monto de COP $%s.",

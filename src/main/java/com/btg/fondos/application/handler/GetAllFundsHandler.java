@@ -3,7 +3,7 @@ package com.btg.fondos.application.handler;
 import com.btg.fondos.application.cqrs.QueryHandler;
 import com.btg.fondos.application.query.GetAllFundsQuery;
 import com.btg.fondos.domain.model.Fund;
-import com.btg.fondos.domain.service.FundService;
+import com.btg.fondos.domain.port.out.FundRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetAllFundsHandler implements QueryHandler<GetAllFundsQuery, List<Fund>> {
 
-    private final FundService fundService;
+    private final FundRepository fundRepository;
 
     @Override
     public List<Fund> handle(GetAllFundsQuery query) {
-        return fundService.getAllFunds();
+        return fundRepository.findAll();
     }
 }

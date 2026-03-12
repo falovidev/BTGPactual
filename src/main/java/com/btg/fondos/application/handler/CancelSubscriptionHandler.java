@@ -3,7 +3,7 @@ package com.btg.fondos.application.handler;
 import com.btg.fondos.application.command.CancelSubscriptionCommand;
 import com.btg.fondos.application.cqrs.CommandHandler;
 import com.btg.fondos.domain.model.Transaction;
-import com.btg.fondos.domain.service.FundService;
+import com.btg.fondos.domain.service.CancelFundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CancelSubscriptionHandler implements CommandHandler<CancelSubscriptionCommand, Transaction> {
 
-    private final FundService fundService;
+    private final CancelFundService cancelFundService;
 
     @Override
     public Transaction handle(CancelSubscriptionCommand command) {
-        return fundService.cancel(command.clientId(), command.fundId());
+        return cancelFundService.cancel(command.clientId(), command.fundId());
     }
 }
