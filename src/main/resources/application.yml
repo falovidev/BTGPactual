@@ -9,7 +9,7 @@ server:
 
 app:
   jwt:
-    secret: bXlTdXBlclNlY3JldEtleUZvckpXVEF1dGhlbnRpY2F0aW9uQlRHUGFjdHVhbDIwMjU=
-    expiration-ms: 86400000
+    secret: ${APP_JWT_SECRET}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
   client:
-    initial-balance: 500000
+    initial-balance: ${APP_CLIENT_INITIAL_BALANCE:500000}

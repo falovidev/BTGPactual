@@ -10,13 +10,6 @@ aws:
     enabled: true
     topic-arn: ${SNS_TOPIC_ARN}
 
-app:
-  jwt:
-    secret: ${APP_JWT_SECRET}
-    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
-  client:
-    initial-balance: ${APP_CLIENT_INITIAL_BALANCE:500000}
-
 logging:
   level:
     com.btg.fondos: INFO

@@ -5,6 +5,10 @@ aws:
   sns:
     enabled: false
 
+app:
+  jwt:
+    secret: bXlTdXBlclNlY3JldEtleUZvckpXVEF1dGhlbnRpY2F0aW9uQlRHUGFjdHVhbDIwMjU=
+
 logging:
   level:
     com.btg.fondos: DEBUG
