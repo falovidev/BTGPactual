@@ -27,6 +27,18 @@ public class DynamoDbConfig {
     @Value("${aws.dynamodb.region:us-east-1}")
     private String region;
 
+    @Value("${aws.dynamodb.table.clients:Clients}")
+    private String clientsTableName;
+
+    @Value("${aws.dynamodb.table.funds:Funds}")
+    private String fundsTableName;
+
+    @Value("${aws.dynamodb.table.transactions:Transactions}")
+    private String transactionsTableName;
+
+    @Value("${aws.dynamodb.table.subscriptions:Subscriptions}")
+    private String subscriptionsTableName;
+
     @Bean
     public DynamoDbClient dynamoDbClient() {
         if (endpoint != null && !endpoint.isBlank()) {
@@ -52,21 +64,21 @@ public class DynamoDbConfig {
 
     @Bean
     public DynamoDbTable<ClientEntity> clientTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table("Clients", TableSchema.fromBean(ClientEntity.class));
+        return enhancedClient.table(clientsTableName, TableSchema.fromBean(ClientEntity.class));
     }
 
     @Bean
     public DynamoDbTable<FundEntity> fundTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table("Funds", TableSchema.fromBean(FundEntity.class));
+        return enhancedClient.table(fundsTableName, TableSchema.fromBean(FundEntity.class));
     }
 
     @Bean
     public DynamoDbTable<TransactionEntity> transactionTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table("Transactions", TableSchema.fromBean(TransactionEntity.class));
+        return enhancedClient.table(transactionsTableName, TableSchema.fromBean(TransactionEntity.class));
     }
 
     @Bean
     public DynamoDbTable<SubscriptionEntity> subscriptionTable(DynamoDbEnhancedClient enhancedClient) {
-        return enhancedClient.table("Subscriptions", TableSchema.fromBean(SubscriptionEntity.class));
+        return enhancedClient.table(subscriptionsTableName, TableSchema.fromBean(SubscriptionEntity.class));
     }
 }

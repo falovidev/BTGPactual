@@ -1,9 +1,21 @@
 aws:
   dynamodb:
-    region: us-east-1
+    region: ${AWS_DYNAMODB_REGION:us-east-1}
+    table:
+      clients: ${DYNAMODB_TABLE_CLIENTS:Clients}
+      funds: ${DYNAMODB_TABLE_FUNDS:Funds}
+      transactions: ${DYNAMODB_TABLE_TRANSACTIONS:Transactions}
+      subscriptions: ${DYNAMODB_TABLE_SUBSCRIPTIONS:Subscriptions}
   sns:
     enabled: true
     topic-arn: ${SNS_TOPIC_ARN}
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
+  client:
+    initial-balance: ${APP_CLIENT_INITIAL_BALANCE:500000}
 
 logging:
   level:

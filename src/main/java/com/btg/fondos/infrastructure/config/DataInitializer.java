@@ -7,12 +7,14 @@ import com.btg.fondos.infrastructure.adapter.out.persistence.entity.TransactionE
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -25,15 +27,18 @@ public class DataInitializer implements CommandLineRunner {
     private final DynamoDbTable<FundEntity> fundTable;
     private final DynamoDbTable<TransactionEntity> transactionTable;
     private final DynamoDbTable<SubscriptionEntity> subscriptionTable;
+    private final Environment environment;
 
     @Override
     public void run(String... args) {
-        createTableIfNotExists("Clients", "clientId", null,
-                List.of(new GsiDef("email-index", "email")));
-        createTableIfNotExists("Funds", "fundId", null, List.of());
-        createTableIfNotExists("Transactions", "transactionId", null,
-                List.of(new GsiDef("clientId-index", "clientId")));
-        createTableIfNotExists("Subscriptions", "clientId", "fundId", List.of());
+        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
+            createTableIfNotExists("Clients", "clientId", null,
+                    List.of(new GsiDef("email-index", "email")));
+            createTableIfNotExists("Funds", "fundId", null, List.of());
+            createTableIfNotExists("Transactions", "transactionId", null,
+                    List.of(new GsiDef("clientId-index", "clientId")));
+            createTableIfNotExists("Subscriptions", "clientId", "fundId", List.of());
+        }
 
         seedFunds();
     }
