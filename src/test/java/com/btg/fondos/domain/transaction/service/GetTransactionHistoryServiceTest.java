@@ -1,5 +1,6 @@
 package com.btg.fondos.domain.transaction.service;
 
+import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.client.port.ClientRepository;
 import com.btg.fondos.domain.transaction.model.Transaction;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,5 +49,14 @@ class GetTransactionHistoryServiceTest {
         List<Transaction> result = getTransactionHistoryService.execute("client-1");
 
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando el cliente no existe")
+    void shouldThrowWhenClientNotFound() {
+        when(clientRepository.findById("unknown")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> getTransactionHistoryService.execute("unknown"))
+                .isInstanceOf(ClientNotFoundException.class);
     }
 }

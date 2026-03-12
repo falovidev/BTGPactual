@@ -1,5 +1,6 @@
 package com.btg.fondos.domain.fund.service;
 
+import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.exception.InsufficientBalanceException;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.client.model.Role;
@@ -120,6 +121,15 @@ class SubscribeFundServiceTest {
 
         assertThatThrownBy(() -> subscribeFundService.subscribe("client-1", "1"))
                 .isInstanceOf(DuplicateSubscriptionException.class);
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando el cliente no existe")
+    void shouldThrowWhenClientNotFound() {
+        when(clientRepository.findById("unknown")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subscribeFundService.subscribe("unknown", "1"))
+                .isInstanceOf(ClientNotFoundException.class);
     }
 
     @Test

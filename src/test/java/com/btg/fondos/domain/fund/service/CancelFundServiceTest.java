@@ -1,8 +1,10 @@
 package com.btg.fondos.domain.fund.service;
 
+import com.btg.fondos.domain.client.exception.ClientNotFoundException;
 import com.btg.fondos.domain.client.model.Client;
 import com.btg.fondos.domain.client.model.Role;
 import com.btg.fondos.domain.client.port.ClientRepository;
+import com.btg.fondos.domain.fund.exception.FundNotFoundException;
 import com.btg.fondos.domain.fund.exception.SubscriptionNotFoundException;
 import com.btg.fondos.domain.fund.model.Fund;
 import com.btg.fondos.domain.fund.model.Subscription;
@@ -81,5 +83,24 @@ class CancelFundServiceTest {
 
         assertThatThrownBy(() -> cancelFundService.cancel("client-1", "1"))
                 .isInstanceOf(SubscriptionNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando el cliente no existe")
+    void shouldThrowWhenClientNotFound() {
+        when(clientRepository.findById("unknown")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cancelFundService.cancel("unknown", "1"))
+                .isInstanceOf(ClientNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Debe lanzar excepción cuando el fondo no existe")
+    void shouldThrowWhenFundNotFound() {
+        when(clientRepository.findById("client-1")).thenReturn(Optional.of(defaultClient));
+        when(fundRepository.findById("999")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cancelFundService.cancel("client-1", "999"))
+                .isInstanceOf(FundNotFoundException.class);
     }
 }
