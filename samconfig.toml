@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "fondos-api-prod"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+region = "us-east-1"
+confirm_changeset = false
+fail_on_empty_changeset = false
+template_file = "cloudformation/template-serverless.yaml"
+parameter_overrides = "Environment=prod"

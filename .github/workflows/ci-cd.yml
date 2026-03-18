@@ -1,0 +1,114 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: '21'
+  AWS_REGION: 'us-east-1'
+
+jobs:
+  # ───────────────── Tests unitarios ─────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: build/reports/tests/test/
+
+  # ───────────────── Tests de integración ─────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run integration tests (Testcontainers + DynamoDB Local)
+        run: ./gradlew integrationTest
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: build/reports/tests/integrationTest/
+
+  # ───────────────── Build + Deploy ─────────────────
+  deploy:
+    name: Deploy to AWS
+    needs: [unit-tests, integration-tests]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build application ZIP
+        run: ./gradlew buildZip
+
+      - name: SAM Build
+        run: sam build -t cloudformation/template-serverless.yaml
+
+      - name: SAM Deploy
+        run: |
+          sam deploy \
+            -t cloudformation/template-serverless.yaml \
+            --resolve-s3 \
+            --stack-name fondos-api-prod \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides \
+              "JwtSecret=${{ secrets.JWT_SECRET }}" \
+              "Environment=prod" \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset
