@@ -42,6 +42,11 @@ out/
 
 ### DynamoDB Local ###
 dynamodb-local/
+dynamodb-local-metadata.json
+shared-local-instance.db
+
+### AWS SAM ###
+.aws-sam/
 
 # Ceiba Method workspace (auto-generated)
 .vscode/ceiba.code-workspace

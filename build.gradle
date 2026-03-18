@@ -56,10 +56,30 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    testImplementation 'org.testcontainers:testcontainers:1.21.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests with Testcontainers (DynamoDB Local)'
+    group = 'verification'
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    environment 'DOCKER_HOST', 'npipe:////./pipe/docker_engine'
+    environment 'TESTCONTAINERS_RYUK_DISABLED', 'true'
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = false
+    }
+    shouldRunAfter tasks.named('test')
 }
 
 tasks.register('buildZip', Zip) {
