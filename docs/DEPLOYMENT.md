@@ -86,18 +86,24 @@ Los 5 fondos del catálogo se crean automáticamente al arrancar la aplicación 
 
 ## Actualizar la aplicación
 
+### Opción A: Automático (recomendado)
+
+Simplemente hacer push a `master`. GitHub Actions ejecuta tests y despliega automáticamente:
+
+```bash
+git push origin master
+```
+
+Ver el pipeline en: **GitHub → Actions → CI/CD Pipeline**
+
+### Opción B: Manual
+
+Con `samconfig.toml` los parámetros ya están configurados:
+
 ```bash
 ./gradlew buildZip
 sam build -t cloudformation/template-serverless.yaml
-sam deploy \
-  -t cloudformation/template-serverless.yaml \
-  --resolve-s3 \
-  --stack-name fondos-api-prod \
-  --capabilities CAPABILITY_IAM \
-  --parameter-overrides \
-    "JwtSecret=<TU_JWT_SECRET_BASE64>" \
-    "Environment=prod" \
-  --no-confirm-changeset
+sam deploy --parameter-overrides "JwtSecret=<TU_JWT_SECRET_BASE64>"
 ```
 
 ## Eliminar la infraestructura
@@ -127,3 +133,21 @@ Esto elimina: Lambda, API Gateway, tablas DynamoDB, topic SNS y roles IAM.
 - **CORS**: Configurado a nivel de API Gateway
 - **Perfiles Spring**: `aws` se activa automáticamente en Lambda
 - **Variables de entorno**: JWT secret, ARN de SNS, nombres de tablas — todo inyectado por CloudFormation
+
+## CI/CD con GitHub Actions
+
+El pipeline está definido en `.github/workflows/ci-cd.yml` y ejecuta:
+
+1. **Unit Tests** → `./gradlew test`
+2. **Integration Tests** → `./gradlew integrationTest` (Testcontainers + DynamoDB Local en Docker)
+3. **Deploy** → `sam build` + `sam deploy` (solo si tests pasan y es push a `master`)
+
+### Configurar GitHub Secrets
+
+Ir a **Settings → Secrets and variables → Actions** en el repositorio y agregar:
+
+| Secret | Valor |
+|--------|-------|
+| `AWS_ACCESS_KEY_ID` | Access Key del usuario IAM |
+| `AWS_SECRET_ACCESS_KEY` | Secret Key del usuario IAM |
+| `JWT_SECRET` | Secreto JWT codificado en Base64 |

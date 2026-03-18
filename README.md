@@ -1,5 +1,7 @@
 # BTG Pactual - API de Fondos de Inversión
 
+![CI/CD Pipeline](https://github.com/falovidev/PruebaJava/actions/workflows/ci-cd.yml/badge.svg)
+
 API REST para la gestión de fondos de inversión que permite a los clientes suscribirse, cancelar suscripciones y consultar su historial de transacciones.
 
 ## Stack Tecnológico
@@ -164,22 +166,50 @@ curl -X DELETE http://localhost:8080/api/funds/1/cancel \
 ## Pruebas
 
 ```bash
+# Tests unitarios
 ./gradlew test
+
+# Tests de integración (requiere Docker para Testcontainers + DynamoDB Local)
+./gradlew integrationTest
 ```
+
+## CI/CD con GitHub Actions
+
+El proyecto incluye un pipeline automatizado que se ejecuta en cada push a `master`:
+
+```
+push a master → Unit Tests → Integration Tests → Build ZIP → SAM Deploy → AWS Lambda
+```
+
+| Job | Qué hace | Cuándo |
+|-----|----------|--------|
+| **Unit Tests** | `./gradlew test` | Push y PR a master |
+| **Integration Tests** | `./gradlew integrationTest` (Testcontainers + DynamoDB Local) | Push y PR a master |
+| **Deploy** | `sam build` + `sam deploy` a AWS | Solo push a master (si tests pasan) |
+
+### Configurar secrets en GitHub
+
+Ir a **Settings → Secrets and variables → Actions** y agregar:
+
+| Secret | Descripción |
+|--------|-------------|
+| `AWS_ACCESS_KEY_ID` | Access Key de IAM |
+| `AWS_SECRET_ACCESS_KEY` | Secret Key de IAM |
+| `JWT_SECRET` | Secreto JWT en Base64 |
 
 ## Despliegue en AWS
 
 Ver la [guía de despliegue completa](docs/DEPLOYMENT.md).
 
-Resumen:
+Despliegue manual:
 ```bash
 ./gradlew buildZip
 sam build -t cloudformation/template-serverless.yaml
-sam deploy -t cloudformation/template-serverless.yaml --resolve-s3 \
-  --stack-name fondos-api-prod --capabilities CAPABILITY_IAM \
-  --parameter-overrides "JwtSecret=<BASE64_SECRET> Environment=prod" \
-  --no-confirm-changeset
+sam deploy --parameter-overrides "JwtSecret=<BASE64_SECRET>"
 ```
+
+> Con `samconfig.toml` ya no es necesario repetir `--stack-name`, `--capabilities`, etc.
+> El despliegue también se ejecuta automáticamente via GitHub Actions al hacer push a `master`.
 
 Infraestructura desplegada: Lambda (Java 21 + SnapStart), API Gateway HTTP, DynamoDB, SNS, IAM.
 

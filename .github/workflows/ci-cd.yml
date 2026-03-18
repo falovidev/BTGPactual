@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run unit tests
-        run: ./gradlew test
+        run: chmod +x gradlew && ./gradlew test
 
       - name: Upload test results
         if: always()
@@ -57,7 +57,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run integration tests (Testcontainers + DynamoDB Local)
-        run: ./gradlew integrationTest
+        run: chmod +x gradlew && ./gradlew integrationTest
 
       - name: Upload test results
         if: always()
@@ -95,7 +95,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Build application ZIP
-        run: ./gradlew buildZip
+        run: chmod +x gradlew && ./gradlew buildZip
 
       - name: SAM Build
         run: sam build -t cloudformation/template-serverless.yaml
