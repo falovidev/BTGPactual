@@ -1,6 +1,6 @@
 # BTG Pactual - API de Fondos de Inversión
 
-![CI/CD Pipeline](https://github.com/falovidev/PruebaJava/actions/workflows/ci-cd.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/falovidev/BTGPactual/actions/workflows/ci-cd.yml/badge.svg)
 
 API REST para la gestión de fondos de inversión que permite a los clientes suscribirse, cancelar suscripciones y consultar su historial de transacciones.
 
@@ -173,12 +173,16 @@ curl -X DELETE http://localhost:8080/api/funds/1/cancel \
 ./gradlew integrationTest
 ```
 
+Colección Postman disponible en [`postman/BTG_Fondos_API.postman_collection.json`](postman/BTG_Fondos_API.postman_collection.json) para pruebas manuales.
+
 ## CI/CD con GitHub Actions
 
 El proyecto incluye un pipeline automatizado que se ejecuta en cada push a `master`:
 
 ```
-push a master → Unit Tests → Integration Tests → Build ZIP → SAM Deploy → AWS Lambda
+push a master → Unit Tests ──┐
+                                ├── Deploy → AWS Lambda
+push a master → Integration Tests ┘
 ```
 
 | Job | Qué hace | Cuándo |
@@ -228,5 +232,5 @@ Infraestructura desplegada: Lambda (Java 21 + SnapStart), API Gateway HTTP, Dyna
 Las siguientes mejoras fueron identificadas y se dejan documentadas como decisiones conscientes fuera del alcance de esta prueba técnica:
 
 - **CORS restringido**: Actualmente permite todos los orígenes (`*`) para facilitar las pruebas. En producción debe restringirse a los dominios del frontend.
-- **Tests de integración**: La cobertura actual se enfoca en dominio (100% mutation testing con PIT). En producción se agregarían tests de controllers, repositorios y flujos end-to-end.
 - **Notificación de cancelación**: Actualmente solo se notifica al suscribirse. Se podría agregar notificación al cancelar por simetría.
+- **Rate limiting**: Agregar throttling por IP en API Gateway para proteger contra abuso.
