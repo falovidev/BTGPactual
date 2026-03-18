@@ -5,6 +5,9 @@ import org.springframework.http.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.core.ParameterizedTypeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TransactionIntegrationTest extends BaseIntegrationTest {
 
-    private static String authToken;
+    private String authToken;
 
     @BeforeAll
     void setUpAuth() {
@@ -25,11 +28,11 @@ class TransactionIntegrationTest extends BaseIntegrationTest {
     @Order(1)
     @DisplayName("GET /api/transactions - Debe retornar historial vacío inicialmente")
     void shouldReturnEmptyHistoryInitially() {
-        ResponseEntity<List> response = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 "/api/transactions",
                 HttpMethod.GET,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                List.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEmpty();
@@ -41,20 +44,23 @@ class TransactionIntegrationTest extends BaseIntegrationTest {
     void shouldCreateOpeningTransactionOnSubscribe() {
         // Subscribir al fondo 3 (DEUDAPRIVADA - $50,000)
         restTemplate.exchange("/api/funds/3/subscribe", HttpMethod.POST,
-                new HttpEntity<>(null, authHeaders(authToken)), Map.class);
+                new HttpEntity<>(null, authHeaders(authToken)),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
-        ResponseEntity<List> response = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 "/api/transactions",
                 HttpMethod.GET,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                List.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).hasSize(1);
+        List<Map<String, Object>> transactions = Objects.requireNonNull(response.getBody());
+        assertThat(transactions).hasSize(1);
 
-        Map<String, Object> txn = (Map<String, Object>) response.getBody().get(0);
-        assertThat(txn.get("type")).isEqualTo("OPENING");
-        assertThat(txn.get("fundName")).isEqualTo("DEUDAPRIVADA");
+        assertThat(transactions.get(0))
+                .containsEntry("type", "OPENING")
+                .containsEntry("fundName", "DEUDAPRIVADA");
+
     }
 
     @Test
@@ -63,13 +69,14 @@ class TransactionIntegrationTest extends BaseIntegrationTest {
     void shouldCreateCancellationTransactionOnCancel() {
         // Cancelar suscripción al fondo 3
         restTemplate.exchange("/api/funds/3/cancel", HttpMethod.DELETE,
-                new HttpEntity<>(null, authHeaders(authToken)), Map.class);
+                new HttpEntity<>(null, authHeaders(authToken)),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
-        ResponseEntity<List> response = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 "/api/transactions",
                 HttpMethod.GET,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                List.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(2);
@@ -79,12 +86,12 @@ class TransactionIntegrationTest extends BaseIntegrationTest {
     @Order(4)
     @DisplayName("GET /api/transactions - Debe fallar sin autenticación")
     void shouldFailWithoutAuth() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/transactions",
                 HttpMethod.GET,
                 new HttpEntity<>(null, jsonHeaders()),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
-        assertThat(response.getStatusCode().value()).isIn(401, 403);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

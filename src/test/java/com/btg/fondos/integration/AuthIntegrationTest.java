@@ -5,6 +5,8 @@ import org.springframework.http.*;
 
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Auth API - Pruebas de Integración")
@@ -26,14 +28,19 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "notificationPreference", "EMAIL"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/register", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/register", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).containsKey("clientId");
-        assertThat(response.getBody().get("email")).isEqualTo(TEST_EMAIL);
-        assertThat(response.getBody().get("name")).isEqualTo("Auth Test User");
-        assertThat(response.getBody()).containsKey("balance");
+        Map<String, Object> responseBody = response.getBody();
+        assertThat(responseBody)
+                .isNotNull()
+                .containsKey("clientId")
+                .containsEntry("email", TEST_EMAIL)
+                .containsEntry("name", "Auth Test User")
+                .containsKey("balance");
     }
 
     @Test
@@ -48,10 +55,13 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "notificationPreference", "SMS"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/register", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/register", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "BUSINESS_ERROR");
     }
 
     @Test
@@ -63,14 +73,19 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "password", TEST_PASSWORD
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/login", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/login", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).containsKey("token");
-        assertThat(response.getBody().get("email")).isEqualTo(TEST_EMAIL);
-        assertThat(response.getBody().get("name")).isEqualTo("Auth Test User");
-        assertThat(response.getBody()).containsKey("clientId");
+        Map<String, Object> responseBody = response.getBody();
+        assertThat(responseBody)
+                .isNotNull()
+                .containsKey("token")
+                .containsEntry("email", TEST_EMAIL)
+                .containsEntry("name", "Auth Test User")
+                .containsKey("clientId");
     }
 
     @Test
@@ -82,10 +97,13 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "password", "wrongpassword"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/login", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/login", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "BUSINESS_ERROR");
     }
 
     @Test
@@ -99,10 +117,13 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "password", "short"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/register", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/register", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "VALIDATION_ERROR");
     }
 
     @Test
@@ -114,9 +135,12 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "password", "password123"
         );
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "/api/auth/login", new HttpEntity<>(body, jsonHeaders()), Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/api/auth/login", HttpMethod.POST,
+                new HttpEntity<>(body, jsonHeaders()),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "BUSINESS_ERROR");
     }
 }

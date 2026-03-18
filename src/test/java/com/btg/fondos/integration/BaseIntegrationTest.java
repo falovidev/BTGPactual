@@ -14,6 +14,10 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
 @Tag("integration")
@@ -52,16 +56,22 @@ public abstract class BaseIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        restTemplate.postForEntity("/api/auth/register",
-                new HttpEntity<>(registerBody, headers), Map.class);
+        ResponseEntity<Map<String, Object>> registerResponse = restTemplate.exchange(
+                "/api/auth/register", HttpMethod.POST,
+                new HttpEntity<>(registerBody, headers),
+                new ParameterizedTypeReference<>() {});
+        assertThat(registerResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         Map<String, String> loginBody = Map.of(
                 "email", email,
                 "password", password
         );
 
-        ResponseEntity<Map> loginResponse = restTemplate.postForEntity("/api/auth/login",
-                new HttpEntity<>(loginBody, headers), Map.class);
+        ResponseEntity<Map<String, Object>> loginResponse = restTemplate.exchange(
+                "/api/auth/login", HttpMethod.POST,
+                new HttpEntity<>(loginBody, headers),
+                new ParameterizedTypeReference<>() {});
+        assertThat(loginResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         return (String) loginResponse.getBody().get("token");
     }

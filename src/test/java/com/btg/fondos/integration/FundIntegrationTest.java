@@ -6,6 +6,8 @@ import org.springframework.http.*;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Fund API - Pruebas de Integración")
@@ -13,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FundIntegrationTest extends BaseIntegrationTest {
 
-    private static String authToken;
+    private String authToken;
 
     @BeforeAll
     void setUpAuth() {
@@ -25,7 +27,9 @@ class FundIntegrationTest extends BaseIntegrationTest {
     @Order(1)
     @DisplayName("GET /api/funds - Debe listar los 5 fondos seeded (público)")
     void shouldListAllFundsPublicly() {
-        ResponseEntity<List> response = restTemplate.getForEntity("/api/funds", List.class);
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "/api/funds", HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(5);
@@ -35,40 +39,44 @@ class FundIntegrationTest extends BaseIntegrationTest {
     @Order(2)
     @DisplayName("POST /api/funds/1/subscribe - Debe suscribirse al fondo exitosamente")
     void shouldSubscribeToFundSuccessfully() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/subscribe",
                 HttpMethod.POST,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody().get("fundName")).isEqualTo("FPV_BTG_PACTUAL_RECAUDADORA");
-        assertThat(response.getBody().get("type")).isEqualTo("OPENING");
-        assertThat(response.getBody()).containsKey("transactionId");
+        Map<String, Object> body = response.getBody();
+        assertThat(body)
+                .isNotNull()
+                .containsEntry("fundName", "FPV_BTG_PACTUAL_RECAUDADORA")
+                .containsEntry("type", "OPENING")
+                .containsKey("transactionId");
     }
 
     @Test
     @Order(3)
     @DisplayName("POST /api/funds/1/subscribe - Debe fallar con suscripción duplicada")
     void shouldFailSubscribeDuplicate() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/subscribe",
                 HttpMethod.POST,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "DUPLICATE_SUBSCRIPTION");
     }
 
     @Test
     @Order(4)
     @DisplayName("GET /api/funds/subscriptions - Debe retornar 1 suscripción activa")
     void shouldReturnOneActiveSubscription() {
-        ResponseEntity<List> response = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 "/api/funds/subscriptions",
                 HttpMethod.GET,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                List.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
@@ -78,79 +86,92 @@ class FundIntegrationTest extends BaseIntegrationTest {
     @Order(5)
     @DisplayName("DELETE /api/funds/1/cancel - Debe cancelar suscripción y retornar monto")
     void shouldCancelSubscriptionSuccessfully() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/cancel",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().get("fundName")).isEqualTo("FPV_BTG_PACTUAL_RECAUDADORA");
-        assertThat(response.getBody().get("type")).isEqualTo("CANCELLATION");
+        Map<String, Object> body = response.getBody();
+        assertThat(body)
+                .isNotNull()
+                .containsEntry("fundName", "FPV_BTG_PACTUAL_RECAUDADORA")
+                .containsEntry("type", "CANCELLATION");
     }
 
     @Test
     @Order(6)
     @DisplayName("DELETE /api/funds/1/cancel - Debe fallar al cancelar suscripción inexistente")
     void shouldFailCancelNonExistentSubscription() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/cancel",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "NOT_FOUND");
     }
 
     @Test
     @Order(7)
     @DisplayName("POST /api/funds/999/subscribe - Debe fallar con fondo inexistente")
     void shouldFailSubscribeToNonExistentFund() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/999/subscribe",
                 HttpMethod.POST,
                 new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "NOT_FOUND");
     }
 
     @Test
     @Order(8)
     @DisplayName("Debe fallar al suscribirse con saldo insuficiente")
     void shouldFailSubscribeWithInsufficientBalance() {
-        // Suscribir a fondos caros para agotar el saldo (500,000 inicial)
+        // Registrar usuario fresco con saldo conocido de 500,000
+        String freshToken = registerAndLogin("Balance Test User", "balance-test@test.com",
+                "+573009999999", "balancepass123");
+
+        // Suscribir a fondos caros para agotar el saldo
         // Fondo 4: FDO-ACCIONES 250,000
         restTemplate.exchange("/api/funds/4/subscribe", HttpMethod.POST,
-                new HttpEntity<>(null, authHeaders(authToken)), Map.class);
+                new HttpEntity<>(null, authHeaders(freshToken)),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
         // Fondo 2: FPV_BTG_PACTUAL_ECOPETROL 125,000
         restTemplate.exchange("/api/funds/2/subscribe", HttpMethod.POST,
-                new HttpEntity<>(null, authHeaders(authToken)), Map.class);
+                new HttpEntity<>(null, authHeaders(freshToken)),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
         // Fondo 5: FPV_BTG_PACTUAL_DINAMICA 100,000
         restTemplate.exchange("/api/funds/5/subscribe", HttpMethod.POST,
-                new HttpEntity<>(null, authHeaders(authToken)), Map.class);
+                new HttpEntity<>(null, authHeaders(freshToken)),
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
         // Saldo restante: 500,000 - 250,000 - 125,000 - 100,000 = 25,000
         // Fondo 1: FPV_BTG_PACTUAL_RECAUDADORA requiere 75,000 → debe fallar
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/subscribe",
                 HttpMethod.POST,
-                new HttpEntity<>(null, authHeaders(authToken)),
-                Map.class);
+                new HttpEntity<>(null, authHeaders(freshToken)),
+                new ParameterizedTypeReference<>() {});
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull().containsEntry("error", "INSUFFICIENT_BALANCE");
     }
 
     @Test
     @Order(9)
     @DisplayName("POST /api/funds/1/subscribe - Debe fallar sin autenticación")
     void shouldFailSubscribeWithoutAuth() {
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "/api/funds/1/subscribe",
                 HttpMethod.POST,
                 new HttpEntity<>(null, jsonHeaders()),
-                Map.class);
+                new ParameterizedTypeReference<>() {});
 
-        assertThat(response.getStatusCode().value()).isIn(401, 403);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }
